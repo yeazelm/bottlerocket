@@ -76,7 +76,7 @@ When these services fail, your machine will not connect to any cluster and will 
 #### `net.toml` structure
 
 The configuration file must be valid TOML and have the filename `net.toml`.
-The first and required top level key in the file is `version`; the latest is version `2`.
+The first and required top level key in the file is `version`; the latest is version `3`.
 The rest of the file is a map of interface name to supported settings.
 Interface names are expected to be correct as per `udevd` naming, no interface naming or matching is supported.
 (See the note below regarding `udevd` interface naming.)
@@ -105,7 +105,31 @@ Please keep in mind that when using static addresses, DNS information must be su
   * `via` (IP address): Gateway IP address.  If no gateway is provided, a scope of `link` is assumed.
   * `route-metric` (integer): Relative route priority.
 
-Example `net.toml` with comments:
+Version `3` adds in support for bonding and vlan tagging. The support is limited to mode `1` (`active-backup`) for [bonding](https://www.kernel.org/doc/Documentation/networking/bonding.txt). Future support may include other bonding options - pull requests are welcome! Version `3` also adds the concept of network devices vs network interfaces. Physical devices like ethernet adapters are considered "interfaces", and network devices encompass other kinds of devices like bonds and vlans. This is a *breaking change* from version 2 and requires the user to specify 
+
+Migrating to version `3` from version `2` requires changes to how devices are defined. For example, if `[eno1]` is the current device name, changing a config from `[eno1]` to `[interface.eno1]` is all that is required. 
+
+Bonding configuration is created via a network device (`device`):
+* `bond` (map): To create a `bond` network device, specify `type = "bond"`.
+  * `interfaces` (list of quoted strings of interfaces): Which interfaces should be added to the bond (i.e. `["eno1"]`). The first in the list is considered the default `primary`.
+  * `parameters` (map): Parameters that will be passed through to configure the bond.
+    * `mode` (string): Currently `active-backup` is the only supported option
+    * `min-links` (int): Number of links required to bring up the device
+    * `monitoring` (map): Value must be `miimon` or `arpmon`. The user must choose one type of monitoring and configure it fully in order for the bond to properly function. See [section 7](https://www.kernel.org/doc/Documentation/networking/bonding.txt) for more background on what to choose.
+      * `miimon_frequency` (int in ms): MII Monitoring frequency in miliseconds
+      * `miimon_updelay` (int in ms): MII Monitoring delay before the link is enabled after link is detected in milliseconds
+      * `miimon_downdelay` (int in ms): MII Monitoring delay before the link is disabled after link is no longer detected in milliseconds
+      * `arpmon_interval` (int in seconds): Number of seconds between intervals to determine link status, must be greater than 0
+      * `arpmon_validate` (enum of `all`, `none`, `active`, `backup`): What packets should be used to validate link
+      * `arpmon_targets` (list of quoted IPv4 address including prefix): List of targets to use for validating ARP. Min = 1, Max = 16
+
+Vlan tagging is configured as a new network device (`device`) stacked on another device:
+* `vlan` (map): Define by `type = "vlan"`
+  * `device` (string for device): Defines the device the vlan should be configured on. If VLAN tagging is required, this device should recieve all IP address configuration instead of the underlying device.
+  * `id` (int): Number between 0 and 4096 specifying the vlan tag on the device
+
+
+Example `net.toml` version `2` with comments:
 ```toml
 version = 2
 
@@ -150,6 +174,36 @@ addresses = ["192.168.14.5/24"]
 to = "10.10.10.0/24"
 from = "192.168.14.5"
 via = "192.168.14.25"
+```
+
+Example `net.toml` version `3` creating a bond and using vlan tagging with comments:
+```toml
+version = 3
+
+# A bond is a `device` that is of `type` `bond`
+[[device.bond0]]
+type = "bond"
+# In this case, the vlan will have addressing, the bond is simply there for use in the vlan
+dhcp4 = false
+dhcp6 = false
+# The first interface in the array is considered `primary` by default
+interfaces = ["eno1", "eno2"]
+
+[bond0.parameters]
+# Currently `active-backup` is the only supported option
+mode = "active-backup"
+min-links = 2
+miimon_frequency = 100 # 100 ms
+miimon_updelay = 200 # 200 ms
+miimon_downdelay = 200 # 200 ms
+
+# "VLAN42" is the name of the device
+[[device.VLAN42]]
+type = "vlan"
+device = "bond0"
+id = 43
+# This configuration is only DHCPing on this device.
+dhcp4 = true
 ```
 
 **An additional note on network device names**

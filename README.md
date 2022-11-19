@@ -56,7 +56,7 @@ We’re excited to get early feedback and to continue working on more use cases!
 Bottlerocket is architected such that different cloud environments and container orchestrators can be supported in the future.
 A build of Bottlerocket that supports different features or integration characteristics is known as a 'variant'.
 The artifacts of a build will include the architecture and variant name.
-For example, an `x86_64` build of the `aws-k8s-1.21` variant will produce an image named `bottlerocket-aws-k8s-1.21-x86_64-<version>-<commit>.img`.
+For example, an `x86_64` build of the `aws-k8s-1.24` variant will produce an image named `bottlerocket-aws-k8s-1.24-x86_64-<version>-<commit>.img`.
 
 The following variants support EKS, as described above:
 
@@ -440,6 +440,23 @@ The following settings are optional and allow you to further configure your clus
 
   **Note:** `ecr-credential-provider` is currently the only supported provider.
   To manage its AWS credentials, see the `settings.aws.config` and `settings.aws.credentials` settings.
+
+  The `ecr-credential-provider` plugin can also be used for AWS IAM Roles Anywhere support.
+  IAM Roles Anywhere is configured using the `settings.aws.config` setting.
+  The content of that setting needs to configure the `credential_process` using the `aws_signing_helper` using your IAM Roles Anywhere settings, similar to the following:
+
+  ```ini
+  [default]
+  region = us-west-2
+  credential_process = aws_signing_helper credential-process \
+     --certificate /var/lib/kubelet/pki/kubelet-client-current.pem \
+     --private-key /var/lib/kubelet/pki/kubelet-client-current.pem \
+     --profile-arn [profile ARN]
+     --role-arn [role ARN]
+     --trust-anchor-arn [trust anchor ARN]
+  ```
+
+  See the [Roles Anywhere documentation](https://docs.aws.amazon.com/rolesanywhere/latest/userguide/credential-helper.html) for more details on the `aws_signing_helper` arguments.
 
 * `settings.kubernetes.event-burst`: The maximum size of a burst of event creations.
 * `settings.kubernetes.event-qps`: The maximum event creations per second.
@@ -1081,7 +1098,7 @@ We currently package the following major third-party components:
 * systemd as init ([background](https://en.wikipedia.org/wiki/Systemd), [packaging](packages/systemd/))
 * wicked for networking ([background](https://github.com/openSUSE/wicked), [packaging](packages/wicked/))
 * containerd ([background](https://containerd.io/), [packaging](packages/containerd/))
-* Kubernetes ([background](https://kubernetes.io/), [packaging](packages/kubernetes-1.21/))
+* Kubernetes ([background](https://kubernetes.io/), [packaging](packages/kubernetes-1.24/))
 * aws-iam-authenticator ([background](https://github.com/kubernetes-sigs/aws-iam-authenticator), [packaging](packages/aws-iam-authenticator/))
 * Amazon ECS agent ([background](https://github.com/aws/amazon-ecs-agent), [packaging](packages/ecs-agent/))
 
