@@ -2,7 +2,7 @@
 %global gorepo kubernetes
 %global goimport %{goproject}/%{gorepo}
 
-%global gover 1.23.12
+%global gover 1.23.13
 %global rpmver %{gover}
 
 %global _dwz_low_mem_die_limit 0
@@ -24,7 +24,7 @@ Summary: Container cluster management
 # base Apache-2.0, third_party Apache-2.0 AND BSD-3-Clause
 License: Apache-2.0 AND BSD-3-Clause
 URL: https://%{goimport}
-Source0: https://distro.eks.amazonaws.com/kubernetes-1-23/releases/6/artifacts/kubernetes/v%{gover}/kubernetes-src.tar.gz
+Source0: https://distro.eks.amazonaws.com/kubernetes-1-23/releases/8/artifacts/kubernetes/v%{gover}/kubernetes-src.tar.gz
 Source1: kubelet.service
 Source2: kubelet-env
 Source3: kubelet-config
@@ -35,6 +35,10 @@ Source7: kubelet-bootstrap-kubeconfig
 Source8: kubernetes-tmpfiles.conf
 Source9: kubelet-sysctl.conf
 Source10: prepare-var-lib-kubelet.service
+Source11: kubelet-server-crt
+Source12: kubelet-server-key
+Source13: etc-kubernetes-pki.mount
+Source14: credential-provider-config-yaml
 
 # ExecStartPre drop-ins
 Source20: prestart-pull-pause-ctr.conf
@@ -56,6 +60,8 @@ Summary: Container cluster node agent
 Requires: %{_cross_os}conntrack-tools
 Requires: %{_cross_os}containerd
 Requires: %{_cross_os}findutils
+Requires: %{_cross_os}ecr-credential-provider
+Requires: %{_cross_os}aws-signing-helper
 
 %description -n %{_cross_os}kubelet-1.23
 %{summary}.
@@ -87,7 +93,7 @@ install -d %{buildroot}%{_cross_bindir}
 install -p -m 0755 ${output}/kubelet %{buildroot}%{_cross_bindir}
 
 install -d %{buildroot}%{_cross_unitdir}
-install -p -m 0644 %{S:1} %{S:10} %{buildroot}%{_cross_unitdir}
+install -p -m 0644 %{S:1} %{S:10} %{S:13} %{buildroot}%{_cross_unitdir}
 
 install -d %{buildroot}%{_cross_unitdir}/kubelet.service.d
 install -p -m 0644 %{S:20} %{S:21} %{S:22} %{S:23} %{buildroot}%{_cross_unitdir}/kubelet.service.d
@@ -99,6 +105,9 @@ install -m 0644 %{S:4} %{buildroot}%{_cross_templatedir}/kubelet-kubeconfig
 install -m 0644 %{S:5} %{buildroot}%{_cross_templatedir}/kubernetes-ca-crt
 install -m 0644 %{S:6} %{buildroot}%{_cross_templatedir}/kubelet-exec-start-conf
 install -m 0644 %{S:7} %{buildroot}%{_cross_templatedir}/kubelet-bootstrap-kubeconfig
+install -m 0644 %{S:11} %{buildroot}%{_cross_templatedir}/kubelet-server-crt
+install -m 0644 %{S:12} %{buildroot}%{_cross_templatedir}/kubelet-server-key
+install -m 0644 %{S:14} %{buildroot}%{_cross_templatedir}/credential-provider-config-yaml
 
 install -d %{buildroot}%{_cross_tmpfilesdir}
 install -p -m 0644 %{S:8} %{buildroot}%{_cross_tmpfilesdir}/kubernetes.conf
@@ -120,6 +129,7 @@ ln -rs \
 %{_cross_bindir}/kubelet
 %{_cross_unitdir}/kubelet.service
 %{_cross_unitdir}/prepare-var-lib-kubelet.service
+%{_cross_unitdir}/etc-kubernetes-pki.mount
 %dir %{_cross_unitdir}/kubelet.service.d
 %{_cross_unitdir}/kubelet.service.d/prestart-pull-pause-ctr.conf
 %{_cross_unitdir}/kubelet.service.d/make-kubelet-dirs.conf
@@ -132,6 +142,9 @@ ln -rs \
 %{_cross_templatedir}/kubelet-bootstrap-kubeconfig
 %{_cross_templatedir}/kubelet-exec-start-conf
 %{_cross_templatedir}/kubernetes-ca-crt
+%{_cross_templatedir}/kubelet-server-crt
+%{_cross_templatedir}/kubelet-server-key
+%{_cross_templatedir}/credential-provider-config-yaml
 %{_cross_tmpfilesdir}/kubernetes.conf
 %{_cross_sysctldir}/90-kubelet.conf
 %dir %{_cross_libexecdir}/kubernetes

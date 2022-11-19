@@ -18,7 +18,7 @@ BUILDSYS_VERSION_BUILD = { script = ["git describe --always --dirty --exclude '*
 BUILDSYS_RELEASE_CONFIG_PATH = "${BUILDSYS_ROOT_DIR}/Release.toml"
 BUILDSYS_VERSION_IMAGE = { script = ["awk -F '[ =\"]+' '$1 == \"version\" {print $2}' ${BUILDSYS_RELEASE_CONFIG_PATH}"] }
 # This can be overridden with -e to build a different variant from the variants/ directory
-BUILDSYS_VARIANT = { script = ['echo "${BUILDSYS_VARIANT:-aws-k8s-1.23}"'] }
+BUILDSYS_VARIANT = { script = ['echo "${BUILDSYS_VARIANT:-aws-k8s-1.24}"'] }
 # Product name used for file and directory naming
 BUILDSYS_NAME = "bottlerocket"
 # "Pretty" name used to identify OS in os-release, bootloader, etc.
@@ -28,7 +28,7 @@ BUILDSYS_PRETTY_NAME = "Bottlerocket OS"
 # SDK name used for building
 BUILDSYS_SDK_NAME="bottlerocket"
 # SDK version used for building
-BUILDSYS_SDK_VERSION="v0.27.0"
+BUILDSYS_SDK_VERSION="v0.28.0"
 # Site for fetching the SDK
 BUILDSYS_REGISTRY="public.ecr.aws/bottlerocket"
 
@@ -45,16 +45,6 @@ PUBLISH_REPO = "default"
 # The version of tuftool (without the 'v') that we will install and use for
 # publishing-related steps
 PUBLISH_TUFTOOL_VERSION="0.8.1"
-
-# The size in GiB of the data volume in the block device mapping of registered
-# AMIs.  (You can also specify PUBLISH_ROOT_VOLUME_SIZE to override the root
-# volume size; by default it's the image size, rounded up.)
-PUBLISH_DATA_VOLUME_SIZE = "20"
-
-# For images using a "unified" layout where both OS and data partitions are in
-# the same image, the root / data distinction doesn't make sense, but we still
-# have an idea of how big the overall volume should be to have "enough" space.
-PUBLISH_UNIFIED_VOLUME_SIZE = "22"
 
 # This can be overridden with -e to change the path to the file containing SSM
 # parameter templates.  This file determines the parameter names and values
@@ -127,12 +117,13 @@ AMI_DATA_FILE_SUFFIX = "amis.json"
 #    5: a final `quick` test on the downgraded instances
 # TESTSYS_STARTING_IMAGE_ID can be used to provide the correct starting image for migration tests.
 TESTSYS_TEST = "quick"
-# The path to the testsys cluster's kubeconfig file. This is used for all testsys calls.
-TESTSYS_KUBECONFIG_PATH = "${BUILDSYS_ROOT_DIR}/testsys.kubeconfig"
+# The default path to the testsys cluster's kubeconfig file. This is used for all testsys calls.
+CARGO_MAKE_DEFAULT_TESTSYS_KUBECONFIG_PATH = "${BUILDSYS_ROOT_DIR}/testsys.kubeconfig"
 # The last released version of bottlerocket.
 TESTSYS_STARTING_VERSION = { script = ["git tag --list --sort=version:refname 'v*' | tail -1"] }
 # The commit for the last release of bottlerocket.
 TESTSYS_STARTING_COMMIT = { script = ["git describe --tag ${TESTSYS_STARTING_VERSION} --always --exclude '*' || echo 00000000"] }
+TESTSYS_TEST_CONFIG_PATH = "${BUILDSYS_ROOT_DIR}/Test.toml"
 
 [env.development]
 # Certain variables are defined here to allow us to override a component value
@@ -157,6 +148,10 @@ BUILDSYS_NAME_VERSION="${BUILDSYS_NAME}-${BUILDSYS_VERSION_FULL}"
 BUILDSYS_NAME_FULL="${BUILDSYS_NAME_VARIANT}-${BUILDSYS_VERSION_FULL}"
 # This name does not include the build short SHA
 BUILDSYS_NAME_FRIENDLY = "${BUILDSYS_NAME_VARIANT}-v${BUILDSYS_VERSION_IMAGE}"
+
+# For variant build artifacts.
+BUILDSYS_VARIANT_DIR = "${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_VERSION_FULL}"
+
 # Path to repo-specific root role.
 PUBLISH_REPO_ROOT_JSON = "${BUILDSYS_ROOT_DIR}/roles/${PUBLISH_REPO}.root.json"
 # If you don't specify a signing key in Infra.toml, we generate one at this path.
@@ -169,11 +164,11 @@ PUBLISH_AMI_NAME_DEFAULT = "${BUILDSYS_NAME}-${BUILDSYS_VARIANT}-${BUILDSYS_ARCH
 
 # The name of the kmod kit archive, used to ease building out-of-tree kernel modules.
 BUILDSYS_KMOD_KIT = "${BUILDSYS_VARIANT}-${BUILDSYS_ARCH}-kmod-kit-v${BUILDSYS_VERSION_IMAGE}.tar.xz"
-BUILDSYS_KMOD_KIT_PATH = "${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_KMOD_KIT}"
+BUILDSYS_KMOD_KIT_PATH = "${BUILDSYS_VARIANT_DIR}/${BUILDSYS_KMOD_KIT}"
 
 # The name of the OVA bundle that will be built if the current variant builds VMDK artifacts
 BUILDSYS_OVA = "${BUILDSYS_NAME_VARIANT}-v${BUILDSYS_VERSION_IMAGE}.ova"
-BUILDSYS_OVA_PATH = "${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_OVA}"
+BUILDSYS_OVA_PATH = "${BUILDSYS_VARIANT_DIR}/${BUILDSYS_OVA}"
 BUILDSYS_OVF_TEMPLATE = "${BUILDSYS_ROOT_DIR}/variants/${BUILDSYS_VARIANT}/template.ovf"
 
 # The default name of uploaded OVAs; override by setting VMWARE_VM_NAME
@@ -183,6 +178,23 @@ VMWARE_VM_NAME_DEFAULT = "${BUILDSYS_NAME}-${BUILDSYS_VARIANT}-${BUILDSYS_ARCH}-
 BOOT_CONFIG_INPUT = "${BUILDSYS_ROOT_DIR}/bootconfig-input"
 # Boot Configuration initrd
 BOOT_CONFIG = "${BUILDSYS_ROOT_DIR}/bootconfig.data"
+
+# Determines the kubeconfig that should be used by testsys. If no kubeconfig was provided and the
+# default kubeconfig location does not exist, use the users default kubeconfig.
+CARGO_MAKE_TESTSYS_KUBECONFIG_ARG = {script = [
+'''
+if [ -n "${TESTSYS_KUBECONFIG}" ]; then
+   # If the user provides a kubeconfig path it should be used.
+   echo "--kubeconfig ${TESTSYS_KUBECONFIG}"
+elif [ -f "${CARGO_MAKE_DEFAULT_TESTSYS_KUBECONFIG_PATH}" ]; then
+   # If the default kubeconfig exists it should be used.
+   echo "--kubeconfig ${CARGO_MAKE_DEFAULT_TESTSYS_KUBECONFIG_PATH}"
+fi
+'''
+]}
+
+# Args that will be passed into all testsys invocations.
+CARGO_MAKE_TESTSYS_ARGS = "${CARGO_MAKE_TESTSYS_KUBECONFIG_ARG}"
 
 [tasks.setup]
 script = [
@@ -332,7 +344,12 @@ done
 
 # A top level target for devs to ensure review and patch readiness
 [tasks.check]
-dependencies = ["check-cargo-version", "unit-tests", "check-fmt", "check-lints"]
+dependencies = [
+   "check-cargo-version",
+   "unit-tests",
+   "check-fmt",
+   "check-lints",
+   ]
 
 [tasks.check-fmt]
 script = [
@@ -382,6 +399,12 @@ fi
 ]
 
 [tasks.check-lints]
+dependencies = [
+   "check-clippy",
+   "check-shell",
+]
+
+[tasks.check-clippy]
 script = [
 '''
 rc=0
@@ -397,6 +420,44 @@ fi
 
 if [ "${rc}" -ne 0 ]; then
   echo "Found lint warnings. First-party source code is checked with clippy." >&2
+  exit $rc
+fi
+'''
+]
+
+[tasks.check-shell]
+script = [
+'''
+rc=0
+
+# For bash first-party shell code
+if ! docker run --rm \
+  --network=none \
+  --user "$(id -u):$(id -g)" \
+  --security-opt label:disable \
+  -v "${BUILDSYS_TOOLS_DIR}":/tmp/tools \
+  "${BUILDSYS_SDK_IMAGE}" \
+  bash -c \
+    'flagged_scripts=0 && \
+    cd /tmp/tools && \
+    for shell_script in $(grep -l --directories=skip --regexp="^#\!.*bash$" * ); do
+      if ! shellcheck \
+        --external-sources \
+        --source-path=SCRIPTDIR \
+        --format=gcc \
+        --severity=warning \
+        "${shell_script}"; then
+        ((++flagged_scripts))
+      fi
+    done && \
+    if [ "${flagged_scripts}" -ne 0 ]; then
+      exit 1
+    fi'; then
+  rc=1
+fi
+
+if [ "${rc}" -ne 0 ]; then
+  echo "Found lint warnings. First-party shell code is checked with ShellCheck." >&2
   exit $rc
 fi
 '''
@@ -584,159 +645,12 @@ export BUILDSYS_VARIANT_FLAVOR="${BUILDSYS_VARIANT_FLAVOR}"
 # because we build host tools with cargo as well, like buildsys and pubsys.
 export CARGO_TARGET_DIR=${BUILDSYS_ROOT_DIR}/variants/target/${BUILDSYS_ARCH}
 
+rm -rf "${BUILDSYS_OUTPUT_DIR}/latest"
 cargo build \
   ${CARGO_BUILD_ARGS} \
   ${CARGO_MAKE_CARGO_ARGS} \
   --manifest-path variants/${BUILDSYS_VARIANT}/Cargo.toml
-'''
-]
-
-[tasks.build-ova]
-script_runner = "bash"
-script = [
-'''
-set -e -o pipefail
-
-cleanup() {
-   [ -n "${ova_tmp_dir}" ] && rm -rf "${ova_tmp_dir}"
-}
-trap 'cleanup' EXIT
-
-measure_image() {
-   local image
-   image="${1:?}"
-   # Can't count on "realpath" availability, so assume an absolute image path underneath
-   # our build root directory.
-   image=".${image#${BUILDSYS_ROOT_DIR}}"
-   docker run --rm \
-      --network=none \
-      --user "$(id -u):$(id -g)" \
-      --security-opt label:disable \
-      -v "${BUILDSYS_ROOT_DIR}/build":/tmp/build \
-      "${BUILDSYS_SDK_IMAGE}" \
-      bash -c "set -o pipefail ; cd /tmp; qemu-img measure ${image} | awk '/required size/{print \$NF}'"
-}
-
-root_vmdk_path="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.vmdk"
-data_vmdk_path="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-data.vmdk"
-ova_tmp_dir="$(mktemp -d)"
-ovf="${BUILDSYS_NAME_FULL}.ovf"
-manifest="${BUILDSYS_NAME_FULL}.mf"
-
-# Short circuit if no OVF template exists.
-if [ ! -s "${BUILDSYS_OVF_TEMPLATE}" ] ; then
-   if [ ! -s "${root_vmdk_path}" ]; then
-      # If no VMDK exists either, there's nothing to do.
-      echo "No OVF template or VMDK images, skipping OVA build"
-      exit 0
-   else
-      # Warn the user if a VMDK exists but an OVF template does not.  Assume we do not
-      # need to build an OVA in this case
-      echo "VMDK image found, but OVF template '${BUILDSYS_OVF_TEMPLATE}' doesn't exist, skipping OVA build"
-      exit 0
-   fi
-fi
-
-# OVF templates all expect at least one disk.
-if [ ! -s "${root_vmdk_path}" ] ; then
-   echo "OVF template exists but VMDK root image doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL}." >&2
-   echo "Unable to build an OVA" >&2
-   exit 1
-fi
-
-# If the template expects a data disk, make sure the image exists - it might not if we
-# built the variant with the "unified" layout.
-if grep -Fq '{{DATA_DISK}}' ${BUILDSYS_OVF_TEMPLATE} && [ ! -s "${data_vmdk_path}" ] ; then
-   echo "OVF template has data disk but VMDK data image doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL}." >&2
-   echo "Unable to build an OVA" >&2
-   exit 1
-fi
-
-# If the template doesn't expect a data disk, make sure the image doesn't exist - it
-# might if we built the variant with the "split" layout.
-if ! grep -Fq '{{DATA_DISK}}' ${BUILDSYS_OVF_TEMPLATE} && [ -s "${data_vmdk_path}" ] ; then
-   echo "OVF template does not have data disk but VMDK data image exists for the current version/commit - ${BUILDSYS_VERSION_FULL}." >&2
-   echo "Unable to build an OVA" >&2
-   exit 1
-fi
-
-is_split="no"
-if [ -s "${data_vmdk_path}" ] ; then
-   is_split="yes"
-fi
-
-bytes_in_gib="$((1024 * 1024 * 1024))"
-root_image_size_bytes="$(measure_image "${root_vmdk_path}")"
-root_image_size_gib="$((root_image_size_bytes / bytes_in_gib))"
-if [ "${is_split}" == "yes" ] ; then
-   # If an optional root volume size is given, it must be larger than the root image.
-   if [ -n "${PUBLISH_ROOT_VOLUME_SIZE}" ] ; then
-      if [ "${PUBLISH_ROOT_VOLUME_SIZE}" -lt "${root_image_size_gib}" ] ; then
-         echo "Root image is larger than the given volume size - pass '-e PUBLISH_ROOT_VOLUME_SIZE=${root_image_size_gib}' to fix" >&2
-         exit 1
-      fi
-      root_image_size_bytes="$((PUBLISH_ROOT_VOLUME_SIZE * bytes_in_gib))"
-   fi
-   data_image_size_bytes="$(measure_image "${data_vmdk_path}")"
-   data_image_size_gib="$((data_image_size_bytes / bytes_in_gib))"
-   if [ "${PUBLISH_DATA_VOLUME_SIZE}" -lt "${data_image_size_gib}" ] ; then
-      echo "Data image is larger than the given volume size - pass '-e PUBLISH_DATA_VOLUME_SIZE=${data_image_size_gib}' to fix" >&2
-      exit 1
-   fi
-   data_image_size_bytes="$((PUBLISH_DATA_VOLUME_SIZE * bytes_in_gib))"
-else # unified
-   if [ "${PUBLISH_UNIFIED_VOLUME_SIZE}" -lt "${root_image_size_gib}" ] ; then
-      echo "Unified image is larger than the given volume size - pass '-e PUBLISH_UNIFIED_VOLUME_SIZE=${root_image_size_gib}' to fix" >&2
-      exit 1
-   fi
-   root_image_size_bytes="$((PUBLISH_UNIFIED_VOLUME_SIZE * bytes_in_gib))"
-   data_image_size_bytes="0"
-fi
-
-# Create the OVF with the correct values
-sed "${BUILDSYS_OVF_TEMPLATE}" \
-   -e "s/{{ROOT_DISK}}/${root_vmdk_path##*/}/g" \
-   -e "s/{{DATA_DISK}}/${data_vmdk_path##*/}/g" \
-   -e "s/{{ROOT_DISK_BYTES}}/${root_image_size_bytes}/g" \
-   -e "s/{{DATA_DISK_BYTES}}/${data_image_size_bytes}/g" \
-   > "${ova_tmp_dir}/${ovf}"
-
-# Make sure we replaced all the '{{...}}' fields with real values.
-if grep -F -e '{{' -e '}}' "${ova_tmp_dir}/${ovf}" ; then
-   echo "Failed to fully render the OVF template" >&2
-   exit 1
-fi
-
-# Create the manifest file with the SHA's of the VMDK's and the OVF
-root_sha256="$(sha256sum ${root_vmdk_path} | awk '{print $1}')"
-if [ "${is_split}" == "yes" ] ; then
-   data_sha256="$(sha256sum ${data_vmdk_path} | awk '{print $1}')"
-fi
-
-echo "SHA256(${root_vmdk_path##*/})= ${root_sha256}" > "${ova_tmp_dir}/${manifest}"
-if [ "${is_split}" == "yes" ] ; then
-   echo "SHA256(${data_vmdk_path##*/})= ${data_sha256}" >> "${ova_tmp_dir}/${manifest}"
-fi
-
-ovf_sha256="$(sha256sum ${ova_tmp_dir}/${ovf} | awk '{print $1}')"
-echo "SHA256(${ovf})= ${ovf_sha256}" >> "${ova_tmp_dir}/${manifest}"
-
-cp "${root_vmdk_path}" "${ova_tmp_dir}"
-if [ "${is_split}" == "yes" ] ; then
-   cp "${data_vmdk_path}" "${ova_tmp_dir}"
-fi
-
-# According to the OVF spec:
-# https://www.dmtf.org/sites/default/files/standards/documents/DSP0243_2.1.1.pdf,
-# the OVF must be first in the tar bundle.  Manifest is next, and then the
-# files must fall in the same order as listed in the References section of the
-# OVF file
-tar -cf "${ova_tmp_dir}/${BUILDSYS_OVA}" -C "${ova_tmp_dir}" "${ovf}" "${manifest}" "${root_vmdk_path##*/}"
-if [ "${is_split}" == "yes" ] ; then
-   tar -rf "${ova_tmp_dir}/${BUILDSYS_OVA}" -C "${ova_tmp_dir}" "${data_vmdk_path##*/}"
-fi
-
-mv "${ova_tmp_dir}/${BUILDSYS_OVA}" "${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.ova"
+ln -snf "${BUILDSYS_VERSION_FULL}" "${BUILDSYS_OUTPUT_DIR}/latest"
 '''
 ]
 
@@ -800,58 +714,11 @@ docker run --rm \
 '''
 ]
 
-
-[tasks.link-clean]
-dependencies = ["fetch"]
-script = [
-'''
-for link in \
-    ${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_VARIANT}* \
-    ${BUILDSYS_OUTPUT_DIR}/latest/*-kmod-kit-* \
-    ${BUILDSYS_OUTPUT_DIR}/latest/*.ova \
-    ${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_FRIENDLY}*; do
-  if [ -L "${link}" ]; then
-    rm ${link}
-  fi
-done
-'''
-]
-
-[tasks.link-variant]
-dependencies = ["build-variant"]
-script_runner = "bash"
-script = [
-'''
-mkdir -p ${BUILDSYS_OUTPUT_DIR}/latest
-for artifact in ${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}* ; do
-  file_name="${artifact##*/}"
-  link_name="${file_name/${BUILDSYS_NAME_FULL}/${BUILDSYS_NAME_VARIANT}}"
-  ln -snf "../${file_name}" "${BUILDSYS_OUTPUT_DIR}/latest/${link_name}"
-done
-ln -snf "../${BUILDSYS_NAME_FULL}-kmod-kit.tar.xz" "${BUILDSYS_KMOD_KIT_PATH}"
-if [ -s "${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.ova" ] ; then
-  ln -snf "../${BUILDSYS_NAME_FULL}.ova" "${BUILDSYS_OVA_PATH}"
-fi
-
-# Symlink the root and data disk images to a more friendly name.  All variants
-# will have an image, not all builds have a data disk image
-os_disk_img="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.img.lz4"
-data_disk_img="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-data.img.lz4"
-ln -snf "${os_disk_img}" "${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_FRIENDLY}.img.lz4"
-if [ -s "${data_disk_img}" ]; then
-   ln -snf "${data_disk_img}" "${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_FRIENDLY}-data.img.lz4"
-fi
-'''
-]
-
 [tasks.build]
 dependencies = [
-    "link-clean",
     "check-licenses",
     "fetch-licenses",
     "build-variant",
-    "build-ova",
-    "link-variant",
 ]
 
 [tasks.tuftool]
@@ -927,9 +794,9 @@ trap 'cleanup' EXIT
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-bootlz4="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-boot.ext4.lz4"
-rootlz4="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-root.ext4.lz4"
-hashlz4="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-root.verity.lz4"
+bootlz4="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-boot.ext4.lz4"
+rootlz4="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-root.ext4.lz4"
+hashlz4="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-root.verity.lz4"
 if [ ! -s "${bootlz4}" ] || [ ! -s "${rootlz4}" ] || [ ! -s "${hashlz4}" ]; then
    echo "Image files don't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make'" >&2
    exit 1
@@ -939,7 +806,7 @@ COPY_REPO_TARGETS=()
 
 # TODO: only add migrations from Release.toml, not all
 MIGRATIONS_DIR="$(mktemp -d)"
-tar xpf "${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-migrations.tar" -C "${MIGRATIONS_DIR}"
+tar xpf "${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-migrations.tar" -C "${MIGRATIONS_DIR}"
 for file in ${MIGRATIONS_DIR}/*; do
    [ -e "${file}" ] || continue
    COPY_REPO_TARGETS+=("--copy-target ${file}")
@@ -949,19 +816,19 @@ done
 # modules for a given release.
 LINK_REPO_TARGETS=("--link-target ${BUILDSYS_KMOD_KIT_PATH}")
 
-# Include the root and data disk images in the repo both with and without a
+# Include the os and data disk images in the repo both with and without a
 # friendly name if they exist.  Check for the existence of the image and not
 # the friendly symlink to guard against the case where the link may not have
 # been created. `pubsys` will also fail if the friendly link does not exist
-os_disk_img="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.img.lz4"
-os_disk_img_friendly="${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_FRIENDLY}.img.lz4"
+os_disk_img="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}.img.lz4"
+os_disk_img_friendly="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FRIENDLY}.img.lz4"
 if [ -s "${os_disk_img}" ] ; then
    LINK_REPO_TARGETS+=("--link-target ${os_disk_img}")
    LINK_REPO_TARGETS+=("--link-target ${os_disk_img_friendly}")
 fi
 
-data_disk_img="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-data.img.lz4"
-data_disk_img_friendly="${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_FRIENDLY}-data.img.lz4"
+data_disk_img="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-data.img.lz4"
+data_disk_img_friendly="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FRIENDLY}-data.img.lz4"
 if [ -s "${data_disk_img}" ]; then
    LINK_REPO_TARGETS+=("--link-target ${data_disk_img}")
    LINK_REPO_TARGETS+=("--link-target ${data_disk_img_friendly}")
@@ -1102,21 +969,21 @@ set -e
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
 cleanup() {
-   ([ -f "${root_image}" ] && rm -f "${root_image}") ||:
+   ([ -f "${os_image}" ] && rm -f "${os_image}") ||:
    ([ -f "${data_image}" ] && rm -f "${data_image}") ||:
 }
 trap 'cleanup' EXIT
 
-# Unlz4 the root image, and the data image if present
-rootlz4="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.img.lz4"
-root_image="${rootlz4%.lz4}"
-if [ ! -s "${rootlz4}" ]; then
+# Unlz4 the os image, and the data image if present
+oslz4="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}.img.lz4"
+os_image="${oslz4%.lz4}"
+if [ ! -s "${oslz4}" ]; then
    echo "Image file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make'" >&2
    exit 1
 fi
-lz4 -df "${rootlz4}" "${root_image}"
+lz4 -df "${oslz4}" "${os_image}"
 
-datalz4="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-data.img.lz4"
+datalz4="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-data.img.lz4"
 data_image="${datalz4%.lz4}"
 
 # We will only have a data image if the variant uses the "split" format.
@@ -1126,39 +993,15 @@ if [ -s "${datalz4}" ] ; then
    is_split="yes"
 fi
 
-bytes_in_gib="$((1024 * 1024 * 1024))"
-root_image_size_gib="$(($(stat -c %s "${root_image}") / bytes_in_gib))"
-if [ "${is_split}" == "yes" ] ; then
-   # If an optional root volume size is given, it must be larger than the root image.
-   if [ -n "${PUBLISH_ROOT_VOLUME_SIZE}" ] && [ "${PUBLISH_ROOT_VOLUME_SIZE}" -lt "${root_image_size_gib}" ] ; then
-      echo "Root image is larger than the given volume size - pass '-e PUBLISH_ROOT_VOLUME_SIZE=${root_image_size_gib}' to fix" >&2
-      exit 1
-   fi
-   data_image_size_gib="$(($(stat -c %s "${data_image}") / bytes_in_gib))"
-   if [ "${PUBLISH_DATA_VOLUME_SIZE}" -lt "${data_image_size_gib}" ] ; then
-      echo "Data image is larger than the given volume size - pass '-e PUBLISH_DATA_VOLUME_SIZE=${data_image_size_gib}' to fix" >&2
-      exit 1
-   fi
-else # unified
-   if [ "${PUBLISH_UNIFIED_VOLUME_SIZE}" -lt "${root_image_size_gib}" ] ; then
-      echo "Unified image is larger than the given volume size - pass '-e PUBLISH_UNIFIED_VOLUME_SIZE=${root_image_size_gib}' to fix" >&2
-      exit 1
-   fi
-fi
-
-root_volume_args=(--root-image "${root_image}")
+os_volume_args=(--os-image "${os_image}")
 data_volume_args=()
 if [ "${is_split}" == "yes" ] ; then
-   # Pass the root volume size if specified, otherwise it defaults to the size of the image.
-   root_volume_args+=(${PUBLISH_ROOT_VOLUME_SIZE:+--root-volume-size "${PUBLISH_ROOT_VOLUME_SIZE}"})
-   # Pass the data image to register as a snapshot, and its desired size.
-   data_volume_args+=(--data-image "${data_image}" --data-volume-size "${PUBLISH_DATA_VOLUME_SIZE}")
-else # unified
-   root_volume_args+=(--root-volume-size "${PUBLISH_UNIFIED_VOLUME_SIZE}")
+   # Pass the data image to register as a snapshot.
+   data_volume_args+=(--data-image "${data_image}")
 fi
 
-ami_output="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
-ami_output_latest="${BUILDSYS_OUTPUT_DIR}/latest/${BUILDSYS_NAME_VARIANT}-${AMI_DATA_FILE_SUFFIX}"
+ami_output="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+ami_output_latest="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_VARIANT}-${AMI_DATA_FILE_SUFFIX}"
 
 ami_name="${PUBLISH_AMI_NAME:-${PUBLISH_AMI_NAME_DEFAULT}}"
 
@@ -1167,9 +1010,10 @@ pubsys \
    \
    ami \
    \
-   "${root_volume_args[@]}" \
+   "${os_volume_args[@]}" \
    "${data_volume_args[@]}" \
    \
+   --variant-manifest "${BUILDSYS_ROOT_DIR}/variants/${BUILDSYS_VARIANT}/Cargo.toml" \
    --arch "${BUILDSYS_ARCH}" \
    --name "${ami_name}" \
    --description "${PUBLISH_AMI_DESCRIPTION:-${ami_name}}" \
@@ -1179,7 +1023,7 @@ pubsys \
    ${NO_PROGRESS:+--no-progress} \
    ${PUBLISH_REGIONS:+--regions "${PUBLISH_REGIONS}"}
 
-ln -snf "../${ami_output##*/}" "${ami_output_latest}"
+ln -snf "${ami_output##*/}" "${ami_output_latest}"
 '''
 ]
 
@@ -1195,7 +1039,7 @@ set -e
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-ami_input="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+ami_input="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
 if [ ! -s "${ami_input}" ]; then
    echo "AMI input file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make ami'" >&2
    exit 1
@@ -1225,7 +1069,7 @@ set -e
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-ami_input="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+ami_input="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
 if [ ! -s "${ami_input}" ]; then
    echo "AMI input file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make ami'" >&2
    exit 1
@@ -1255,12 +1099,12 @@ set -e
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-if [ -z "${GRANT_TO_USERS}" ] && [ -z "${GRANT_TO_GROUPS}" ]; then
-   echo "GRANT_TO_USERS and/or GRANT_TO_GROUPS is mandatory for grant-ami; please give a comma-separated list of user IDs or group names" >&2
+if [ -z "${GRANT_TO_USERS}" ] && [ -z "${GRANT_TO_GROUPS}" ] && [ -z "${GRANT_TO_ORGS}" ] && [ -z "${GRANT_TO_ORG_UNITS}" ]; then
+   echo "GRANT_TO_USERS, GRANT_TO_GROUPS, GRANT_TO_ORGs, and/or GRANT_TO_ORG_UNITS is mandatory for grant-ami; please give a comma-separated list of user IDs, group names, organizations, or organizational units" >&2
    exit 1
 fi
 
-ami_input="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+ami_input="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
 if [ ! -s "${ami_input}" ]; then
    echo "AMI input file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make ami'" >&2
    exit 1
@@ -1273,6 +1117,8 @@ pubsys \
    --grant \
    ${GRANT_TO_USERS:+--user-ids "${GRANT_TO_USERS}"} \
    ${GRANT_TO_GROUPS:+--group-names "${GRANT_TO_GROUPS}"} \
+   ${GRANT_TO_ORGS:+--organization-arns "${GRANT_TO_ORGS}"} \
+   ${GRANT_TO_ORG_UNITS:+--organizational-unit-arns "${GRANT_TO_ORG_UNITS}"} \
    \
    --ami-input "${ami_input}" \
    ${PUBLISH_REGIONS:+--regions "${PUBLISH_REGIONS}"}
@@ -1291,12 +1137,12 @@ set -e
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-if [ -z "${REVOKE_FROM_USERS}" ] && [ -z "${REVOKE_FROM_GROUPS}" ]; then
-   echo "REVOKE_FROM_USERS and/or REVOKE_FROM_GROUPS is mandatory for revoke-ami; please give a comma-separated list of user IDs or group names" >&2
+if [ -z "${REVOKE_FROM_USERS}" ] && [ -z "${REVOKE_FROM_GROUPS}" ] && [ -z "${REVOKE_FROM_ORGS}" ] && [ -z "${REVOKE_FROM_ORG_UNITS}" ]; then
+   echo "REVOKE_FROM_USERS, REVOKE_FROM_GROUPS, REVOKE_FROM_ORGS, and/or REVOKE_FROM_ORG_UNITS is mandatory for revoke-ami; please give a comma-separated list of user IDs, group names, organizations, or organizational units" >&2
    exit 1
 fi
 
-ami_input="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+ami_input="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
 if [ ! -s "${ami_input}" ]; then
    echo "AMI input file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make ami'" >&2
    exit 1
@@ -1309,6 +1155,8 @@ pubsys \
    --revoke \
    ${REVOKE_FROM_USERS:+--user-ids "${REVOKE_FROM_USERS}"} \
    ${REVOKE_FROM_GROUPS:+--group-names "${REVOKE_FROM_GROUPS}"} \
+   ${REVOKE_FROM_ORGS:+--organization-arns "${REVOKE_FROM_ORGS}"} \
+   ${REVOKE_FROM_ORG_UNITS:+--organizational-unit-arns "${REVOKE_FROM_ORG_UNITS}"} \
    \
    --ami-input "${ami_input}" \
    ${PUBLISH_REGIONS:+--regions "${PUBLISH_REGIONS}"}
@@ -1327,7 +1175,7 @@ set -e
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-ami_input="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+ami_input="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
 if [ ! -s "${ami_input}" ]; then
    echo "AMI input file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make ami'" >&2
    exit 1
@@ -1393,7 +1241,7 @@ set -e
 
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
 
-ova_path="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}.ova"
+ova_path="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}.ova"
 if [ ! -s "${ova_path}" ]; then
    echo "An OVA doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make'" >&2
    exit 1
@@ -1507,7 +1355,7 @@ script = [
     '''
     set -eu
     export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
-    testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} install
+    testsys ${CARGO_MAKE_TESTSYS_ARGS} install
     '''
 ]
 
@@ -1518,7 +1366,7 @@ dependencies = ["test-tools"]
 script = [
     '''
     set -eu
-    ami_input="${BUILDSYS_OUTPUT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
+    ami_input="${BUILDSYS_VARIANT_DIR}/${BUILDSYS_NAME_FULL}-${AMI_DATA_FILE_SUFFIX}"
     if [ ! -s "${ami_input}" ]; then
       echo "AMI input file doesn't exist for the current version/commit - ${BUILDSYS_VERSION_FULL} - please run 'cargo make ami'" >&2
       exit 1
@@ -1526,7 +1374,7 @@ script = [
     export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
     # The ami that is selected from `amis.json` is determined by `TESTSYS_REGION` if set; otherwise,
     # it is the first region listed in `Infra.toml` (for aws variants).
-    testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} run ${TESTSYS_TEST} \
+    testsys ${CARGO_MAKE_TESTSYS_ARGS} run ${TESTSYS_TEST} \
       --ami-input "${ami_input}" \
       ${TESTSYS_AWS_SECRET_NAME:+--secret ${TESTSYS_AWS_SECRET_NAME}} \
     '''
@@ -1539,7 +1387,7 @@ script = [
     '''
     set -eu
     export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
-    testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} delete
+    testsys ${CARGO_MAKE_TESTSYS_ARGS} delete
     '''
 ]
 
@@ -1550,7 +1398,7 @@ script = [
    '''
    set -eu
    export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
-   testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} uninstall
+   testsys ${CARGO_MAKE_TESTSYS_ARGS} uninstall
    '''
 ]
 
@@ -1561,7 +1409,7 @@ script = [
    '''
    set -eu
    export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
-   watch -- testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} status ${@}
+   watch -- testsys ${CARGO_MAKE_TESTSYS_ARGS} status ${@}
    '''
 ]
 
@@ -1573,7 +1421,7 @@ script = [
    '''
    set -eu
    export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
-   testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} logs --test ${@}
+   testsys ${CARGO_MAKE_TESTSYS_ARGS} logs --test ${@}
    '''
 ]
 
@@ -1584,7 +1432,7 @@ script = [
    '''
    set -eu
    export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
-   testsys --kubeconfig ${TESTSYS_KUBECONFIG_PATH} ${@}
+   testsys ${CARGO_MAKE_TESTSYS_ARGS} ${@}
    '''
 ]
 

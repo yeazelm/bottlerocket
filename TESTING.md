@@ -102,6 +102,12 @@ cargo make testsys add secret map  \
  "secret-access-key=$(aws configure get aws_secret_access_key --profile ${PROFILE})"
 ```
 
+If you added a secret, you then need to pass the secret's name to testsys
+through an environment variable:
+```shell
+export TESTSYS_AWS_SECRET_NAME="awsCredentials=<Name of your secret>"
+```
+
 ### Conveniences
 
 All testsys commands can be run using cargo make to eliminate the chance of 2 different versions of
@@ -112,11 +118,30 @@ Testsys requires the controller and the agent images to be of the same testsys v
 cargo make testsys <arguments>
 ```
 
-The Bottlerocket components are found in the `testsys-bottlerocket-aws` Kubernetes namespace.
+The Bottlerocket components are found in the `testsys` Kubernetes namespace.
 
 ## Run
 
 Now that you have the testsys cluster set up, it's time to run a Bottlerocket integration test!
+
+### Configuration
+
+There are many arguments that can be configured via environment variables with `cargo make`; however, it is possible to create a configuration file instead.
+Check out the [example config file](tools/testsys/Test.toml.example) for a sample `Test.toml` file.
+
+For example, the instance type can be specified based on variant requirements:
+
+```yaml
+[aws-k8s]
+# Set the default instance type for all `aws-k8s` variants
+instance-type = "m5.xlarge"
+
+[aws-k8s-nvidia]
+# Override the instance type for `nvidia` `aws-k8s` variants
+instance-type = "g5g.2xlarge"
+```
+
+Since `aws-k8s-nvidia` is a `<FAMILY>-<FLAVOR>` level configuration it will take precedence over `aws-k8s` which is `<FAMILY>` level configuration.
 
 ### Variants
 

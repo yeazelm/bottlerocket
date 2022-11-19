@@ -458,7 +458,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "aws-admin-container-v0-9-2"
+name = "aws-admin-container-v0-9-3"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
@@ -493,7 +493,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "aws-control-container-v0-6-3"
+name = "aws-config-settings"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "aws-control-container-v0-6-4"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "aws-creds"
+version = "0.1.0"
+dependencies = [
+ "bottlerocket-variant",
+ "migration-helpers",
+]
+
+[[package]]
+name = "aws-creds-metadata"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
@@ -1134,6 +1156,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "credential-providers"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
 name = "crossbeam-channel"
 version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1299,20 +1328,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dns-settings"
-version = "0.1.0"
-dependencies = [
- "migration-helpers",
-]
-
-[[package]]
-name = "dns-settings-metadata"
-version = "0.1.0"
-dependencies = [
- "migration-helpers",
-]
-
-[[package]]
 name = "doc-comment"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1364,6 +1379,13 @@ dependencies = [
  "tokio",
  "toml",
  "vmw_backdoor",
+]
+
+[[package]]
+name = "ecs-additional-configurations"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
 ]
 
 [[package]]
@@ -2015,7 +2037,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "kubelet-log-level"
+name = "kubelet-new-config-files"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "kubelet-tls-config"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "kubelet-tls-files"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
@@ -2285,6 +2321,8 @@ dependencies = [
  "model-derive",
  "rand",
  "regex",
+ "scalar",
+ "scalar-derive",
  "semver",
  "serde",
  "serde_json",
@@ -2766,14 +2804,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "public-admin-container-v0-9-2"
+name = "public-admin-container-v0-9-3"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
 ]
 
 [[package]]
-name = "public-control-container-v0-6-3"
+name = "public-control-container-v0-6-4"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
@@ -2826,13 +2864,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "reboot-to-reconcile-setting"
-version = "0.1.0"
-dependencies = [
- "migration-helpers",
 ]
 
 [[package]]
@@ -2900,6 +2931,7 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "rustls 0.20.6",
+ "rustls-native-certs 0.6.2",
  "rustls-pemfile",
  "serde",
  "serde_json",
@@ -2911,7 +2943,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "webpki-roots",
  "winreg",
 ]
 
@@ -3032,6 +3063,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "scalar"
+version = "0.1.0"
+dependencies = [
+ "generate-readme",
+ "serde",
+]
+
+[[package]]
+name = "scalar-derive"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "generate-readme",
+ "proc-macro2",
+ "quote",
+ "scalar",
+ "serde",
+ "syn",
 ]
 
 [[package]]
@@ -4151,16 +4203,6 @@ checksum = "f095d78192e208183081cc07bc5515ef55216397af48b873e5edcd72637fa1bd"
 dependencies = [
  "ring",
  "untrusted",
-]
-
-[[package]]
-name = "webpki-roots"
-version = "0.22.2"
-dependencies = [
- "lazy_static",
- "log",
- "pem",
- "webpki 0.21.4",
 ]
 
 [[package]]

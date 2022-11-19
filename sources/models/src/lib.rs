@@ -145,9 +145,9 @@ use std::net::IpAddr;
 
 use crate::de::{deserialize_mirrors, deserialize_node_taints};
 use crate::modeled_types::{
-    BootConfigKey, BootConfigValue, BootstrapContainerMode, CpuManagerPolicy, DNSDomain,
-    ECSAgentImagePullBehavior, ECSAgentLogLevel, ECSAttributeKey, ECSAttributeValue,
-    EtcHostsEntries, FriendlyVersion, Identifier, ImageGCHighThresholdPercent,
+    BootConfigKey, BootConfigValue, BootstrapContainerMode, CpuManagerPolicy, CredentialProvider,
+    DNSDomain, ECSAgentImagePullBehavior, ECSAgentLogLevel, ECSAttributeKey, ECSAttributeValue,
+    ECSDurationValue, EtcHostsEntries, FriendlyVersion, Identifier, ImageGCHighThresholdPercent,
     ImageGCLowThresholdPercent, KmodKey, KubernetesAuthenticationMode, KubernetesBootstrapToken,
     KubernetesCloudProvider, KubernetesClusterDnsIp, KubernetesClusterName,
     KubernetesDurationValue, KubernetesEvictionHardKey, KubernetesLabelKey, KubernetesLabelValue,
@@ -207,6 +207,9 @@ struct KubernetesSettings {
     image_gc_low_threshold_percent: ImageGCLowThresholdPercent,
     provider_id: Url,
     log_level: u8,
+    credential_providers: HashMap<Identifier, CredentialProvider>,
+    server_certificate: ValidBase64,
+    server_key: ValidBase64,
 
     // Settings where we generate a value based on the runtime environment.  The user can specify a
     // value to override the generated one, but typically would not.
@@ -227,6 +230,11 @@ struct ECSSettings {
     loglevel: ECSAgentLogLevel,
     enable_spot_instance_draining: bool,
     image_pull_behavior: ECSAgentImagePullBehavior,
+    container_stop_timeout: ECSDurationValue,
+    task_cleanup_wait: ECSDurationValue,
+    metadata_service_rps: i64,
+    metadata_service_burst: i64,
+    reserved_memory: u16,
 }
 
 #[model]
@@ -340,6 +348,9 @@ struct BootSettings {
 #[model]
 struct AwsSettings {
     region: SingleLineString,
+    config: ValidBase64,
+    credentials: ValidBase64,
+    profile: SingleLineString,
 }
 
 // Metrics settings

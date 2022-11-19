@@ -56,7 +56,7 @@ We’re excited to get early feedback and to continue working on more use cases!
 Bottlerocket is architected such that different cloud environments and container orchestrators can be supported in the future.
 A build of Bottlerocket that supports different features or integration characteristics is known as a 'variant'.
 The artifacts of a build will include the architecture and variant name.
-For example, an `x86_64` build of the `aws-k8s-1.21` variant will produce an image named `bottlerocket-aws-k8s-1.21-x86_64-<version>-<commit>.img`.
+For example, an `x86_64` build of the `aws-k8s-1.24` variant will produce an image named `bottlerocket-aws-k8s-1.24-x86_64-<version>-<commit>.img`.
 
 The following variants support EKS, as described above:
 
@@ -421,6 +421,43 @@ The following settings are optional and allow you to further configure your clus
 * `settings.kubernetes.container-log-max-size`: The maximum size of container log file before it is rotated.
 * `settings.kubernetes.cpu-manager-policy`: Specifies the CPU manager policy. Possible values are `static` and `none`. Defaults to `none`. If you want to allow pods with certain resource characteristics to be granted increased CPU affinity and exclusivity on the node, you can set this setting to `static`. You should reboot if you change this setting after startup - try `apiclient reboot`.
 * `settings.kubernetes.cpu-manager-reconcile-period`: Specifies the CPU manager reconcile period, which controls how often updated CPU assignments are written to cgroupfs. The value is a duration like `30s` for 30 seconds or `1h5m` for 1 hour and 5 minutes.
+* `settings.kubernetes.credential-providers`: Contains a collection of Kubelet image credential provider settings.
+  Each name under `credential-providers` is the name of the plugin to configure.
+
+  Example user data for configuring the `ecr-credential-provider` credential provider plugin:
+
+  ```toml
+  [settings.kubernetes.credential-providers.ecr-credential-provider]
+  enabled = true
+  # (optional - defaults to "12h")
+  cache-duration = "30m"
+  image-patterns = [
+    # One or more URL paths to match an image prefix. Supports globbing of subdomains.
+    "*.dkr.ecr.us-east-2.amazonaws.com",
+    "*.dkr.ecr.us-west-2.amazonaws.com"
+  ]
+  ```
+
+  **Note:** `ecr-credential-provider` is currently the only supported provider.
+  To manage its AWS credentials, see the `settings.aws.config` and `settings.aws.credentials` settings.
+
+  The `ecr-credential-provider` plugin can also be used for AWS IAM Roles Anywhere support.
+  IAM Roles Anywhere is configured using the `settings.aws.config` setting.
+  The content of that setting needs to configure the `credential_process` using the `aws_signing_helper` using your IAM Roles Anywhere settings, similar to the following:
+
+  ```ini
+  [default]
+  region = us-west-2
+  credential_process = aws_signing_helper credential-process \
+     --certificate /var/lib/kubelet/pki/kubelet-client-current.pem \
+     --private-key /var/lib/kubelet/pki/kubelet-client-current.pem \
+     --profile-arn [profile ARN]
+     --role-arn [role ARN]
+     --trust-anchor-arn [trust anchor ARN]
+  ```
+
+  See the [Roles Anywhere documentation](https://docs.aws.amazon.com/rolesanywhere/latest/userguide/credential-helper.html) for more details on the `aws_signing_helper` arguments.
+
 * `settings.kubernetes.event-burst`: The maximum size of a burst of event creations.
 * `settings.kubernetes.event-qps`: The maximum event creations per second.
 * `settings.kubernetes.eviction-hard`: The signals and thresholds that trigger pod eviction.
@@ -456,6 +493,8 @@ The following settings are optional and allow you to further configure your clus
   ephemeral-storage= "1Gi"
   ```
 
+* `settings.kubernetes.server-certificate`: The base64 encoded content of an x509 certificate for the Kubelet web server, which is used for retrieving logs and executing commands.
+* `settings.kubernetes.server-key`: The base64 encoded content of an x509 private key for the Kubelet web server.
 * `settings.kubernetes.topology-manager-policy`: Specifies the topology manager policy. Possible values are `none`, `restricted`, `best-effort`, and `single-numa-node`. Defaults to `none`.
 * `settings.kubernetes.topology-manager-scope`: Specifies the topology manager scope. Possible values are `container` and `pod`. Defaults to `container`. If you want to group all containers in a pod to a common set of NUMA nodes, you can set this setting to `pod`.
 
@@ -511,6 +550,8 @@ These settings can be changed at any time.
 * `settings.ecs.allow-privileged-containers`: Whether launching privileged containers is allowed on the container instance.
   If this value is set to false, privileged containers are not permitted.
   Bottlerocket sets this value to false by default.
+* `settings.ecs.container-stop-timeout`: Time to wait for the task's containers to stop on their own before they are forcefully stopped.
+Valid time units include `s`, `m`, and `h`, e.g. `1h`, `1m1s`.
 * `settings.ecs.enable-spot-instance-draining`: If the instance receives a spot termination notice, the agent will set the instance's state to `DRAINING`, so the workload can be moved gracefully before the instance is removed. Defaults to `false`.
 * `settings.ecs.image-pull-behavior`: The behavior used to customize the [pull image process](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html#ecs-agent-availparam) for your container instances.
   Supported values are `default`, `always`, `once`, `prefer-cached`, and the default is `default`.
@@ -519,6 +560,13 @@ These settings can be changed at any time.
   Bottlerocket enables the `json-file`, `awslogs`, and `none` drivers by default.
 * `settings.ecs.loglevel`: The level of verbosity for the ECS agent's logs.
   Supported values are `debug`, `info`, `warn`, `error`, and `crit`, and the default is `info`.
+* `settings.ecs.metadata-service-rps`: The steady state rate limit of the throttling configurations set for the task metadata service.
+* `settings.ecs.metadata-service-burst`: The burst rate limit of the throttling configurations set for the task metadata service.
+* `settings.ecs.reserved-memory`: The amount of memory, in MiB, reserved for critical system processes.
+* `settings.ecs.task-cleanup-wait`: Time to wait before the task's containers are removed after they are stopped.
+Valid time units are `s`, `m`, and `h`, e.g. `1h`, `1m1s`.
+
+  **Note**: `metadata-service-rps` and `metadata-service-burst` directly map to the values set by the `ECS_TASK_METADATA_RPS_LIMIT` environment variable.
 
 #### CloudFormation signal helper settings
 
@@ -951,9 +999,25 @@ They can be overridden for testing purposes in [the same way as other settings](
 
 ##### AWS-specific settings
 
-AWS-specific settings are automatically set based on calls to the Instance MetaData Service (IMDS).
+* `settings.aws.config`: The base64 encoded content to use for AWS configuration (e.g. `base64 -w0 ~/.aws/config`).
+* `settings.aws.credentials`: The base64 encoded content to use for AWS credentials (e.g. `base64 -w0 ~/.aws/credentials`).
+* `settings.aws.profile`: The profile name to use from the provided `config` and `credentials` settings.
+
+  For example:
+
+  ```toml
+  [settings.aws]
+  profile = "myprofile"
+  ```
+
+  **Note**: If `settings.aws.profile` is not set, the setting will fallback to the "default" profile.
+
+  **Note:** The `config`, `credentials`, and `profile` are optional and do not need to be set when using an Instance Profile when running on an AWS instance.
 
 * `settings.aws.region`: This is set to the AWS region in which the instance is running, for example `us-west-2`.
+
+  The `region` setting is automatically inferred based on calls to the Instance MetaData Service (IMDS) when running within AWS.
+  It does not need to be explicitly set unless you have a reason to override this default value.
 
 ### Logs
 
@@ -1034,7 +1098,7 @@ We currently package the following major third-party components:
 * systemd as init ([background](https://en.wikipedia.org/wiki/Systemd), [packaging](packages/systemd/))
 * wicked for networking ([background](https://github.com/openSUSE/wicked), [packaging](packages/wicked/))
 * containerd ([background](https://containerd.io/), [packaging](packages/containerd/))
-* Kubernetes ([background](https://kubernetes.io/), [packaging](packages/kubernetes-1.21/))
+* Kubernetes ([background](https://kubernetes.io/), [packaging](packages/kubernetes-1.24/))
 * aws-iam-authenticator ([background](https://github.com/kubernetes-sigs/aws-iam-authenticator), [packaging](packages/aws-iam-authenticator/))
 * Amazon ECS agent ([background](https://github.com/aws/amazon-ecs-agent), [packaging](packages/ecs-agent/))
 

@@ -8,6 +8,7 @@
 
 pub mod error {
     use regex::Regex;
+    use scalar::ValidationError;
     use snafu::Snafu;
 
     // x509_parser::pem::Pem::parse_x509 returns an Err<X509Error>, which is a bit
@@ -141,11 +142,28 @@ pub mod error {
         #[snafu(display("Invalid imageGCLowThresholdPercent '{}': {}", input, msg))]
         InvalidImageGCLowThresholdPercent { input: String, msg: String },
 
+        #[snafu(display("Invalid ECS duration value '{}'", input))]
+        InvalidECSDurationValue { input: String },
+
         #[snafu(display("Could not parse '{}' as an integer", input))]
         ParseInt {
             input: String,
             source: std::num::ParseIntError,
         },
+    }
+
+    /// Creates a `ValidationError` with a consistent message for strings with regex validations
+    /// where the regex is too big to display to the user.
+    pub(crate) fn big_pattern_error<S1, S2>(thing: S1, input: S2) -> ValidationError
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
+        ValidationError::new(format!(
+            "{} given invalid input: {}",
+            thing.as_ref(),
+            input.as_ref()
+        ))
     }
 }
 
@@ -238,6 +256,16 @@ macro_rules! string_impls_for {
             fn eq(&self, other: &&str) -> bool {
                 &self.inner == other
             }
+        }
+    };
+}
+
+/// This is similar to the `Snafu` `ensure` macro that we are familiar with, but it works with our
+/// own `ValidationError` instead of a `Snafu` error enum.
+macro_rules! require {
+    ($condition:expr, $err:expr) => {
+        if !($condition) {
+            return Err($err);
         }
     };
 }

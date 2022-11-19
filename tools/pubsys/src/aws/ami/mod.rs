@@ -5,7 +5,7 @@ mod register;
 mod snapshot;
 pub(crate) mod wait;
 
-use crate::aws::publish_ami::{get_snapshots, modify_image, modify_snapshots};
+use crate::aws::publish_ami::{get_snapshots, modify_image, modify_snapshots, ModifyOptions};
 use crate::aws::{client::build_client_config, parse_arch, region_from_string};
 use crate::Args;
 use aws_sdk_ebs::Client as EbsClient;
@@ -34,21 +34,17 @@ use wait::wait_for_ami;
 #[derive(Debug, StructOpt)]
 #[structopt(setting = clap::AppSettings::DeriveDisplayOrder)]
 pub(crate) struct AmiArgs {
-    /// Path to the image containing the root volume
-    #[structopt(short = "r", long, parse(from_os_str))]
-    root_image: PathBuf,
+    /// Path to the image containing the os volume
+    #[structopt(short = "o", long, parse(from_os_str))]
+    os_image: PathBuf,
 
     /// Path to the image containing the data volume
     #[structopt(short = "d", long, parse(from_os_str))]
     data_image: Option<PathBuf>,
 
-    /// Desired root volume size in gibibytes
-    #[structopt(long)]
-    root_volume_size: Option<i32>,
-
-    /// Desired data volume size in gibibytes
-    #[structopt(long)]
-    data_volume_size: Option<i32>,
+    /// Path to the variant manifest
+    #[structopt(short = "v", long, parse(from_os_str))]
+    variant_manifest: PathBuf,
 
     /// The architecture of the machine image
     #[structopt(short = "a", long, parse(try_from_str = parse_arch))]
@@ -229,9 +225,15 @@ async fn _run(args: &Args, ami_args: &AmiArgs) -> Result<HashMap<String, Image>>
         info!("Granting access to target accounts so we can copy the AMI");
         let account_id_vec: Vec<_> = account_ids.into_iter().collect();
 
+        let modify_options = ModifyOptions {
+            user_ids: account_id_vec,
+            group_names: Vec::new(),
+            organization_arns: Vec::new(),
+            organizational_unit_arns: Vec::new(),
+        };
+
         modify_snapshots(
-            Some(account_id_vec.clone()),
-            None,
+            &modify_options,
             &OperationType::Add,
             &ids_of_image.snapshot_ids,
             &base_ec2_client,
@@ -244,8 +246,7 @@ async fn _run(args: &Args, ami_args: &AmiArgs) -> Result<HashMap<String, Image>>
         })?;
 
         modify_image(
-            Some(account_id_vec.clone()),
-            None,
+            &modify_options,
             &OperationType::Add,
             &ids_of_image.image_id,
             &base_ec2_client,

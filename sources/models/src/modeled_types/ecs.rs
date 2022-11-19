@@ -2,7 +2,10 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Just need serde's Error in scope to get its trait methods
-use super::error;
+use super::error::{self, big_pattern_error};
+use scalar::traits::{Scalar, Validate};
+use scalar::ValidationError;
+use scalar_derive::Scalar;
 use serde::de::Error as _;
 use snafu::{ensure, ResultExt};
 use std::borrow::Borrow;
@@ -13,7 +16,7 @@ use std::ops::Deref;
 /// ECSAttributeKey represents a string that contains a valid ECS attribute key.  It stores
 /// the original string and makes it accessible through standard traits.
 // https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Attribute.html
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Scalar)]
 pub struct ECSAttributeKey {
     inner: String,
 }
@@ -30,24 +33,16 @@ lazy_static! {
     .unwrap();
 }
 
-impl TryFrom<&str> for ECSAttributeKey {
-    type Error = error::Error;
-
-    fn try_from(input: &str) -> Result<Self, Self::Error> {
-        ensure!(
-            ECS_ATTRIBUTE_KEY.is_match(input),
-            error::BigPatternSnafu {
-                thing: "ECS attribute key",
-                input
-            }
+impl Validate for ECSAttributeKey {
+    fn validate<S: Into<String>>(input: S) -> std::result::Result<Self, ValidationError> {
+        let input = input.into();
+        require!(
+            ECS_ATTRIBUTE_KEY.is_match(&input),
+            big_pattern_error("ECS attribute key", &input)
         );
-        Ok(ECSAttributeKey {
-            inner: input.to_string(),
-        })
+        Ok(ECSAttributeKey { inner: input })
     }
 }
-
-string_impls_for!(ECSAttributeKey, "ECSAttributeKey");
 
 #[cfg(test)]
 mod test_ecs_attribute_key {
@@ -288,6 +283,72 @@ mod test_ecs_agent_image_pull_behavior {
     fn bad_vals() {
         for val in &["", "tomorrow", "never", " "] {
             ECSAgentImagePullBehavior::try_from(*val).unwrap_err();
+        }
+    }
+}
+
+/// ECSDurationValue represents a string that contains a valid ECS duration value
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct ECSDurationValue {
+    inner: String,
+}
+
+lazy_static! {
+    pub(crate) static ref ECS_DURATION_VALUE: Regex =
+        Regex::new(r"^(([0-9]+\.)?[0-9]+h)?(([0-9]+\.)?[0-9]+m)?(([0-9]+\.)?[0-9]+s)?(([0-9]+\.)?[0-9]+ms)?(([0-9]+\.)?[0-9]+(u|µ)s)?(([0-9]+\.)?[0-9]+ns)?$").unwrap();
+}
+
+impl TryFrom<&str> for ECSDurationValue {
+    type Error = error::Error;
+
+    fn try_from(input: &str) -> Result<Self, Self::Error> {
+        ensure!(
+            !input.is_empty() && ECS_DURATION_VALUE.is_match(input),
+            error::InvalidECSDurationValueSnafu { input }
+        );
+        Ok(ECSDurationValue {
+            inner: input.to_string(),
+        })
+    }
+}
+
+string_impls_for!(ECSDurationValue, "ECSDurationValue");
+
+#[cfg(test)]
+mod test_ecs_duration_value {
+    use super::ECSDurationValue;
+    use std::convert::TryFrom;
+
+    #[test]
+    fn valid_values() {
+        for ok in &[
+            "99s",
+            "20m",
+            "1h",
+            "1h2m3s",
+            "4m5s",
+            "2h3s",
+            "1.5h3.5m",
+            "1ms1us1ns",
+            "1s1µs1ns",
+        ] {
+            ECSDurationValue::try_from(*ok).unwrap();
+        }
+    }
+
+    #[test]
+    fn invalid_values() {
+        for err in &[
+            "",
+            "100",
+            "...3ms",
+            "1..5s",
+            "ten second",
+            "1m2h",
+            "1y2w",
+            &"a".repeat(23),
+        ] {
+            ECSDurationValue::try_from(*err).unwrap_err();
         }
     }
 }

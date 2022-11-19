@@ -25,16 +25,20 @@ members = [
     "api/prairiedog",
 
     # "api/migration/migrations/vX.Y.Z/..."
-    "api/migration/migrations/v1.10.0/dns-settings",
-    "api/migration/migrations/v1.10.0/dns-settings-metadata",
-    "api/migration/migrations/v1.10.0/reboot-to-reconcile-setting",
-    "api/migration/migrations/v1.10.0/kubelet-log-level",
-    "api/migration/migrations/v1.10.0/aws-admin-container-v0-9-2",
-    "api/migration/migrations/v1.10.0/public-admin-container-v0-9-2",
-    "api/migration/migrations/v1.10.0/aws-control-container-v0-6-3",
-    "api/migration/migrations/v1.10.0/public-control-container-v0-6-3",
     "api/migration/migrations/v1.10.1/container-runtime",
     "api/migration/migrations/v1.10.1/container-runtime-metadata",
+    "api/migration/migrations/v1.11.0/aws-creds",
+    "api/migration/migrations/v1.11.0/aws-creds-metadata",
+    "api/migration/migrations/v1.11.0/aws-config-settings",
+    "api/migration/migrations/v1.11.0/credential-providers",
+    "api/migration/migrations/v1.11.0/kubelet-tls-config",
+    "api/migration/migrations/v1.11.0/kubelet-tls-files",
+    "api/migration/migrations/v1.11.0/kubelet-new-config-files",
+    "api/migration/migrations/v1.11.0/ecs-additional-configurations",
+    "api/migration/migrations/v1.11.0/aws-admin-container-v0-9-3",
+    "api/migration/migrations/v1.11.0/public-admin-container-v0-9-3",
+    "api/migration/migrations/v1.11.0/aws-control-container-v0-6-4",
+    "api/migration/migrations/v1.11.0/public-control-container-v0-6-4",
 
     "bottlerocket-release",
 
@@ -65,8 +69,6 @@ members = [
     "updater/update_metadata",
     "updater/updog",
 
-    "webpki-roots-shim",
-
     "constants",
 
     "shimpei"
@@ -74,8 +76,3 @@ members = [
 
 [profile.release]
 debug = true
-
-# This replaces webpki-roots with a shim that reads from the ca-certificates package. See
-# webpki-roots-shim/Cargo.toml for more information about using the right version number.
-[patch.crates-io.webpki-roots]
-path = "webpki-roots-shim"

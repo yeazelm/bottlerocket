@@ -288,6 +288,20 @@ func runCtr(containerdSocket string, namespace string, containerID string, sourc
 			oci.WithHostNamespace(runtimespec.NetworkNamespace),
 			oci.WithHostHostsFile,
 			oci.WithHostResolvconf,
+			// Unmask `/sys/firmware` by passing an alternate list of masked paths
+			// List is based on the DefaultUnixSpec's MaskedPaths for Linux
+			// (https://github.com/containerd/containerd/blob/e9af808/oci/spec.go#L164)
+			oci.WithMaskedPaths([]string{
+				"/proc/acpi",
+				"/proc/asound",
+				"/proc/kcore",
+				"/proc/keys",
+				"/proc/latency_stats",
+				"/proc/timer_list",
+				"/proc/timer_stats",
+				"/proc/sched_debug",
+				"/proc/scsi",
+			}),
 			// Pass proxy environment variables to this container
 			withProxyEnv(),
 			// Add a default set of mounts regardless of the container type
@@ -642,6 +656,7 @@ func withBootstrap() oci.SpecOpts {
 		// container's capabilities.
 		seccomp.WithDefaultProfile(),
 		oci.WithAllDevicesAllowed,
+		withSwapManagement,
 	)
 }
 
@@ -837,6 +852,18 @@ func withRootFsShared() oci.SpecOpts {
 		}
 		return nil
 	}
+}
+
+// withSwapManagement allows the swapon and swapoff syscalls
+func withSwapManagement(_ context.Context, _ oci.Client, _ *containers.Container, s *runtimespec.Spec) error {
+	if s.Linux != nil && s.Linux.Seccomp != nil && s.Linux.Seccomp.Syscalls != nil {
+		s.Linux.Seccomp.Syscalls = append(s.Linux.Seccomp.Syscalls, runtimespec.LinuxSyscall{
+			Names:  []string{"swapon", "swapoff"},
+			Action: runtimespec.ActAllow,
+			Args:   []runtimespec.LinuxSeccompArg{},
+		})
+	}
+	return nil
 }
 
 // withProxyEnv reads proxy environment variables and returns a spec option for passing said proxy environment variables

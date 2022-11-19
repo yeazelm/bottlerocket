@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use crate::error::Result;
 use clap::Parser;
 use log::{info, trace};
 use model::test_manager::{ImageConfig, TestManager};
@@ -21,7 +21,7 @@ pub(crate) struct Install {
     #[clap(
         long = "controller-uri",
         env = "TESTSYS_CONTROLLER_IMAGE",
-        default_value = "public.ecr.aws/bottlerocket-test-system/controller:v0.0.1"
+        default_value = "public.ecr.aws/bottlerocket-test-system/controller:v0.0.3"
     )]
     controller_uri: String,
 }
@@ -36,9 +36,7 @@ impl Install {
             (Some(secret), image) => ImageConfig::WithCreds { secret, image },
             (None, image) => ImageConfig::Image(image),
         };
-        client.install(controller_image).await.context(
-            "Unable to install testsys to the cluster. (Some artifacts may be left behind)",
-        )?;
+        client.install(controller_image).await?;
 
         info!("testsys components were successfully installed.");
 

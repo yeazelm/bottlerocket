@@ -56,12 +56,8 @@ eventRecordQPS: {{settings.kubernetes.event-qps}}
 {{#if settings.kubernetes.event-burst includeZero=true}}
 eventBurst: {{settings.kubernetes.event-burst}}
 {{/if}}
-{{#if settings.kubernetes.kube-api-qps includeZero=true}}
-kubeAPIQPS: {{settings.kubernetes.kube-api-qps}}
-{{/if}}
-{{#if settings.kubernetes.kube-api-burst includeZero=true}}
-kubeAPIBurst: {{settings.kubernetes.kube-api-burst}}
-{{/if}}
+kubeAPIQPS: {{default 10 settings.kubernetes.kube-api-qps}}
+kubeAPIBurst: {{default 20 settings.kubernetes.kube-api-burst}}
 kubeReserved:
   cpu: "{{kube_reserve_cpu settings.kubernetes.kube-reserved.cpu}}"
   {{#if settings.kubernetes.kube-reserved.memory}}
@@ -115,7 +111,12 @@ featureGates:
   CSIMigrationvSphere: true
 protectKernelDefaults: true
 serializeImagePulls: false
+{{#if (and (default "" settings.kubernetes.server-certificate) (default "" settings.kubernetes.server-key))}}
+tlsCertFile: "/etc/kubernetes/pki/kubelet-server.crt"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet-server.key"
+{{else}}
 serverTLSBootstrap: {{settings.kubernetes.server-tls-bootstrap}}
+{{/if}}
 tlsCipherSuites:
 - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
 volumePluginDir: "/var/lib/kubelet/plugins/volume/exec"
