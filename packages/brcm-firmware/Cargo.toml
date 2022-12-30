@@ -1,0 +1,13 @@
+[package]
+name = "brcm-firmware"
+version = "0.1.0"
+edition = "2018"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "pkg.rs"
+
+[[package.metadata.build-package.external-files]]
+url = "file:///home/yeazelm/git/bottlerocket/packages/brcm-firmware/brcm-firmware.tgz"
+sha512 = "ef8fecc44a050b92a9d0f81d82c4d8144897772352c4867c3bcabd9bed58482ec50eb5351abd3e37ca4e08188f893f9a8113721b4752f6ad28d9171eeba27c24"
