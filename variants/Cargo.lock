@@ -195,6 +195,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "brcm-firmware"
+version = "0.1.0"
+
+[[package]]
 name = "ca-certificates"
 version = "0.1.0"
 
@@ -336,6 +340,10 @@ dependencies = [
  "glibc",
  "libselinux",
 ]
+
+[[package]]
+name = "firmware"
+version = "0.1.0"
 
 [[package]]
 name = "glibc"
@@ -763,6 +771,7 @@ dependencies = [
  "docker-engine",
  "docker-init",
  "docker-proxy",
+ "firmware",
  "iputils",
  "kernel-5_15",
  "login",
@@ -813,6 +822,24 @@ dependencies = [
  "kernel-5_15",
  "kubernetes-1_24",
  "release",
+]
+
+[[package]]
+name = "metal-rpi-dev"
+version = "0.1.0"
+dependencies = [
+ "brcm-firmware",
+ "chrony",
+ "docker-cli",
+ "docker-engine",
+ "docker-init",
+ "docker-proxy",
+ "iputils",
+ "kernel-5_15",
+ "login",
+ "release",
+ "strace",
+ "tcpdump",
 ]
 
 [[package]]

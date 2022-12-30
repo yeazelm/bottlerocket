@@ -1,0 +1,64 @@
+[package]
+name = "metal-rpi-dev"
+version = "0.1.0"
+edition = "2018"
+publish = false
+build = "build.rs"
+# Don't rebuild crate just because of changes to README.
+exclude = ["README.md"]
+
+[package.metadata.build-variant.image-layout]
+#os-image-size-gib = 6 Probably don't need this now
+partition-plan = "unified"
+
+[package.metadata.build-variant.image-features]
+grub-set-private-var = true
+
+[package.metadata.build-variant]
+image-format = "raw"
+kernel-parameters = [
+    # Only reserve if there are at least 2GB
+    #"crashkernel=2G-:256M",
+    "console=ttyAMA0,115200",
+    "console=tty1",
+]
+included-packages = [
+# core
+    "release",
+    "kernel-5.10",
+		#"kernel-5.15",
+    #"firmware", # We might not want this... but its does things?
+		"brcm-firmware",
+# docker
+    "docker-cli",
+    "docker-engine",
+    "docker-init",
+    "docker-proxy",
+# tools
+    "login",
+    "iputils",
+    "strace",
+    "tcpdump",
+    "chrony-tools",
+]
+
+[lib]
+path = "lib.rs"
+
+[build-dependencies]
+# core
+release = { path = "../../packages/release" }
+#kernel-5_15 = { path = "../../packages/kernel-5.15" }
+kernel-5_10 = { path = "../../packages/kernel-5.10" }
+brcm-firmware = { path = "../../packages/brcm-firmware" }
+# docker
+docker-cli = { path = "../../packages/docker-cli" }
+docker-engine = { path = "../../packages/docker-engine" }
+docker-init = { path = "../../packages/docker-init" }
+docker-proxy = { path = "../../packages/docker-proxy" }
+# tools
+login = { path = "../../packages/login" }
+iputils = { path = "../../packages/iputils" }
+strace = { path = "../../packages/strace" }
+tcpdump = { path = "../../packages/tcpdump" }
+chrony = { path = "../../packages/chrony" }
