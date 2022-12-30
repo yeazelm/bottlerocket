@@ -20,6 +20,10 @@ Patch1001: 1001-Makefile-add-prepare-target-for-external-modules.patch
 Patch2000: 2000-kbuild-move-module-strip-compression-code-into-scrip.patch
 Patch2001: 2001-kbuild-add-support-for-zstd-compressed-modules.patch
 
+# Add Raspberry Pi dm-verity fixes
+Patch3001: 3001-dm-verity-wait-for-slow-devices.patch
+Patch3002: 3002-dm-init-waitfor.patch
+
 BuildRequires: bc
 BuildRequires: elfutils-devel
 BuildRequires: hostname
