@@ -17,6 +17,8 @@ Source103: config-bottlerocket-vmware
 Patch1001: 1001-Makefile-add-prepare-target-for-external-modules.patch
 # Expose tools/* targets for out-of-tree module builds
 Patch1002: 1002-Revert-kbuild-hide-tools-build-targets-from-external.patch
+Patch1003: 1003-dm-init-waitfor.patch
+Patch1004: 1004-dm-init-retry.patch
 
 BuildRequires: bc
 BuildRequires: elfutils-devel
