@@ -60,7 +60,8 @@ OVERHEAD_MIB="$((GPT_MIB * 2 + BIOS_MIB))"
 # The 'recommended' size for the EFI partition is 100MB but our EFI images are
 # under 2MB, so this will suffice for now. It would be possible to increase the
 # EFI partition size by taking space from the "reserved" area below.
-EFI_MIB="5" # one per bank
+#EFI_MIB="5" # one per bank
+EFI_MIB="15" # one per bank
 
 ###############################################################################
 # Section 3: variable sized partitions

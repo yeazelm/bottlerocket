@@ -8,7 +8,7 @@ build = "build.rs"
 exclude = ["README.md"]
 
 [package.metadata.build-variant.image-layout]
-#os-image-size-gib = 6 Probably don't need this now
+os-image-size-gib = 6 #Probably don't need this now
 partition-plan = "unified"
 
 [package.metadata.build-variant.image-features]
@@ -26,9 +26,10 @@ included-packages = [
 # core
     "release",
     "kernel-5.10",
-		#"kernel-5.15",
+	#"kernel-5.15",
     #"firmware", # We might not want this... but its does things?
-		"brcm-firmware",
+	"brcm-firmware",
+	"rpi-efi",
 # docker
     "docker-cli",
     "docker-engine",
@@ -51,6 +52,7 @@ release = { path = "../../packages/release" }
 #kernel-5_15 = { path = "../../packages/kernel-5.15" }
 kernel-5_10 = { path = "../../packages/kernel-5.10" }
 brcm-firmware = { path = "../../packages/brcm-firmware" }
+rpi-efi = { path = "../../packages/rpi-efi" }
 # docker
 docker-cli = { path = "../../packages/docker-cli" }
 docker-engine = { path = "../../packages/docker-engine" }

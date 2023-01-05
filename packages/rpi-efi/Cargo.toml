@@ -1,0 +1,13 @@
+[package]
+name = "rpi-efi"
+version = "1.34.0"
+edition = "2018"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "pkg.rs"
+
+[[package.metadata.build-package.external-files]]
+url = "https://github.com/pftf/RPi4/releases/download/v1.34/RPi4_UEFI_Firmware_v1.34.zip"
+sha512 = "f095d6419066e9042f71716865ea495991a4cc4d149ecb514348f397ae2c617de481aead6e507b7dcec018864c6f941b020903c167984accf25bf261010385f7"
