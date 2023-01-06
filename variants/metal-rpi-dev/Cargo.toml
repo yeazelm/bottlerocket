@@ -8,7 +8,7 @@ build = "build.rs"
 exclude = ["README.md"]
 
 [package.metadata.build-variant.image-layout]
-os-image-size-gib = 6 #Probably don't need this now
+#os-image-size-gib = 6 #Probably don't need this now
 partition-plan = "unified"
 
 [package.metadata.build-variant.image-features]

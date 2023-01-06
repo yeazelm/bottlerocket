@@ -22,27 +22,29 @@ Source: RPi4_UEFI_Firmware_v1.34.zip
 # TODO actually do this right and copy to boot
 # We might actually build from EDK2 but then we need to fetch from other places
 # https://github.com/tianocore/edk2-platforms/tree/master/Platform/RaspberryPi/RPi4
-install -d %{buildroot}/boot/firmware/brcm
-install -d %{buildroot}/boot/overlays
-install -p -m 0644 firmware/brcm/* -t %{buildroot}/boot/firmware/brcm/
-install -p -m 0644 RPI_EFI.fd %{buildroot}/boot/
-install -p -m 0644 start4.elf %{buildroot}/boot/
-install -p -m 0644 fixup4.dat %{buildroot}/boot/
-install -p -m 0644 config.txt %{buildroot}/boot/
-install -p -m 0644 bcm2711-rpi-400.dtb %{buildroot}/boot/
-install -p -m 0644 bcm2711-rpi-4-b.dtb %{buildroot}/boot/
-install -p -m 0644 bcm2711-rpi-cm4.dtb %{buildroot}/boot/
+install -d %{buildroot}/boot/efi/firmware/brcm
+install -d %{buildroot}/boot/efi/overlays
+install -p -m 0644 firmware/brcm/* -t %{buildroot}/boot/efi/firmware/brcm/
+install -p -m 0644 overlays/miniuart-bt.dtbo -t %{buildroot}/boot/efi/overlays/
+install -p -m 0644 overlays/upstream-pi4.dtbo -t %{buildroot}/boot/efi/overlays/
+install -p -m 0644 RPI_EFI.fd %{buildroot}/boot/efi/
+install -p -m 0644 start4.elf %{buildroot}/boot/efi/
+install -p -m 0644 fixup4.dat %{buildroot}/boot/efi/
+install -p -m 0644 config.txt %{buildroot}/boot/efi/
+install -p -m 0644 bcm2711-rpi-400.dtb %{buildroot}/boot/efi/
+install -p -m 0644 bcm2711-rpi-4-b.dtb %{buildroot}/boot/efi/
+install -p -m 0644 bcm2711-rpi-cm4.dtb %{buildroot}/boot/efi/
 
 
 %files
-/boot/firmware/brcm
-/boot/overlays
-/boot/RPI_EFI.fd
-/boot/start4.elf
-/boot/fixup4.dat
-/boot/config.txt
-/boot/bcm2711-rpi-400.dtb
-/boot/bcm2711-rpi-4-b.dtb
-/boot/bcm2711-rpi-cm4.dtb
+/boot/efi/firmware/brcm
+/boot/efi/overlays
+/boot/efi/RPI_EFI.fd
+/boot/efi/start4.elf
+/boot/efi/fixup4.dat
+/boot/efi/config.txt
+/boot/efi/bcm2711-rpi-400.dtb
+/boot/efi/bcm2711-rpi-4-b.dtb
+/boot/efi/bcm2711-rpi-cm4.dtb
 
 %{_cross_attribution_file}

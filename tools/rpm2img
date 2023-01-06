@@ -251,7 +251,17 @@ dd if=/dev/zero of="${EFI_IMAGE}" bs=1M count="${partsize[EFI-A]}"
 mkfs.vfat -I -S 512 "${EFI_IMAGE}" $((partsize[EFI-A] * 1024))
 mmd -i "${EFI_IMAGE}" ::/EFI
 mmd -i "${EFI_IMAGE}" ::/EFI/BOOT
+mmd -i "${EFI_IMAGE}" ::/firmware
+mmd -i "${EFI_IMAGE}" ::/firmware/brcm
+mmd -i "${EFI_IMAGE}" ::/overlays
+echo "directories created"
 mcopy -i "${EFI_IMAGE}" "${EFI_MOUNT}/EFI/BOOT"/*.efi ::/EFI/BOOT
+mcopy -i "${EFI_IMAGE}" "${EFI_MOUNT}"/* ::/
+echo "copied root files"
+mcopy -i "${EFI_IMAGE}" "${EFI_MOUNT}"/firmware/brcm/* ::/firmware/brcm
+echo "copied bcrm"  
+#mcopy -i "${EFI_IMAGE}" "${EFI_MOUNT}"/overlays/* ::/overlays
+echo "copied overlays"
 dd if="${EFI_IMAGE}" of="${OS_IMAGE}" conv=notrunc bs=1M seek="${partoff[EFI-A]}"
 
 # Ensure that the grub directory exists.
