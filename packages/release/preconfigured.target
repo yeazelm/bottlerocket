@@ -1,8 +1,10 @@
 [Unit]
 Description=Bottlerocket initial configuration complete
 AllowIsolate=yes
-After=basic.target
-Requires=basic.target
+#After=basic.target
+#Requires=basic.target
+After=console-getty.service basic.target
+Requires=console-getty.service basic.target
 # Prevent manually starting/stopping the target
 RefuseManualStart=true
 RefuseManualStop=true

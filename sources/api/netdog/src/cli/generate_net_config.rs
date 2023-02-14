@@ -17,6 +17,7 @@ pub(crate) struct GenerateNetConfigArgs {}
 
 /// Generate configuration for network interfaces.
 pub(crate) fn run() -> Result<()> {
+    return Ok(());
     let maybe_net_config = if Path::exists(Path::new(OVERRIDE_NET_CONFIG_FILE)) {
         net_config::from_path(OVERRIDE_NET_CONFIG_FILE).context(error::NetConfigParseSnafu {
             path: OVERRIDE_NET_CONFIG_FILE,
