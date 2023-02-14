@@ -1,0 +1,11 @@
+[Unit]
+Description=Dumps data from busctl to a file
+Before=network-pre.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/busctl monitor
+StandardOutput=append:/tmp/busctl-monitor.log
+
+[Install]
+WantedBy=network-pre.target

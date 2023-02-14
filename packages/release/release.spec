@@ -75,6 +75,10 @@ Source1100: systemd-tmpfiles-setup-service-debug.conf
 # systemd-udevd default link
 Source1200: 80-release.link
 
+# busctl monitor
+Source1300: dump-busctl.service
+Source1301: 10-enp0s16.network
+
 BuildArch: noarch
 Requires: %{_cross_os}acpid
 Requires: %{_cross_os}audit
@@ -129,6 +133,7 @@ install -p -m 0644 %{S:98} %{buildroot}%{_cross_libdir}/systemd/system.conf.d/80
 
 install -d %{buildroot}%{_cross_libdir}/systemd/network
 install -p -m 0644 %{S:1200} %{buildroot}%{_cross_libdir}/systemd/network/80-release.link
+install -p -m 0644 %{S:1301} %{buildroot}%{_cross_libdir}/systemd/network/10-enp0s16.network
 
 install -d %{buildroot}%{_cross_tmpfilesdir}
 install -p -m 0644 %{S:99} %{buildroot}%{_cross_tmpfilesdir}/release.conf
@@ -144,7 +149,7 @@ install -p -m 0644 \
   %{S:1008} %{S:1009} %{S:1010} %{S:1011} %{S:1012} %{S:1013} %{S:1015} \
   %{S:1040} %{S:1041} %{S:1042} %{S:1043} %{S:1044} %{S:1045} %{S:1046} \
   %{S:1047} %{S:1048} %{S:1049} %{S:1060} %{S:1061} %{S:1062} %{S:1080} \
-  %{S:1014} \
+  %{S:1014} %{S:1300} \
   %{buildroot}%{_cross_unitdir}
 
 install -d %{buildroot}%{_cross_unitdir}/systemd-tmpfiles-setup.service.d
@@ -194,6 +199,7 @@ ln -s preconfigured.target %{buildroot}%{_cross_unitdir}/default.target
 %{_cross_libdir}/repart.d/80-local.conf
 %{_cross_libdir}/systemd/system.conf.d/80-release.conf
 %{_cross_libdir}/systemd/network/80-release.link
+%{_cross_libdir}/systemd/network/10-enp0s16.network
 %{_cross_unitdir}/configured.target
 %{_cross_unitdir}/preconfigured.target
 %{_cross_unitdir}/multi-user.target
@@ -207,6 +213,7 @@ ln -s preconfigured.target %{buildroot}%{_cross_unitdir}/default.target
 %{_cross_unitdir}/prepare-opt.service
 %{_cross_unitdir}/prepare-var.service
 %{_cross_unitdir}/repart-local.service
+%{_cross_unitdir}/dump-busctl.service
 %{_cross_unitdir}/var.mount
 %{_cross_unitdir}/opt.mount
 %{_cross_unitdir}/mnt.mount
