@@ -4,6 +4,7 @@ pub(crate) mod install;
 pub(crate) mod node_ip;
 pub(crate) mod remove;
 pub(crate) mod set_hostname;
+pub(crate) mod subscribe_dbus;
 pub(crate) mod write_resolv_conf;
 
 use crate::{PRIMARY_INTERFACE, PRIMARY_MAC_ADDRESS, SYS_CLASS_NET};
@@ -16,6 +17,7 @@ use serde::{Deserialize, Serialize};
 pub(crate) use set_hostname::SetHostnameArgs;
 use snafu::{OptionExt, ResultExt};
 use std::fs;
+pub(crate) use subscribe_dbus::SubscribeDbusArgs;
 pub(crate) use write_resolv_conf::WriteResolvConfArgs;
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -191,6 +193,15 @@ mod error {
 
         #[snafu(display("Failed to run 'systemd-sysctl': {}", source))]
         SystemdSysctlExecution { source: io::Error },
+
+        #[snafu(display("Failed to connect to dbus for messages: {}", source))]
+        DbusConnection { source: zbus::Error },
+    }
+
+    impl From<zbus::Error> for Error {
+        fn from(err: zbus::Error) -> Self {
+            crate::cli::error::Error::DbusConnection { source: err }
+        }
     }
 }
 

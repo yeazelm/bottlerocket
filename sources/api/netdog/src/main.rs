@@ -72,6 +72,7 @@ enum SubCommand {
     GenerateNetConfig(cli::GenerateNetConfigArgs),
     SetHostname(cli::SetHostnameArgs),
     WriteResolvConf(cli::WriteResolvConfArgs),
+    SubscribeDbus(cli::SubscribeDbusArgs),
 }
 
 async fn run() -> cli::Result<()> {
@@ -84,6 +85,7 @@ async fn run() -> cli::Result<()> {
         SubCommand::GenerateNetConfig(_) => cli::generate_net_config::run()?,
         SubCommand::SetHostname(args) => cli::set_hostname::run(args)?,
         SubCommand::WriteResolvConf(_) => cli::write_resolv_conf::run()?,
+        SubCommand::SubscribeDbus(_) => cli::subscribe_dbus::run().await?,
     }
     Ok(())
 }
