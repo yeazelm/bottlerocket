@@ -26,6 +26,8 @@ snafu = "0.7"
 tokio = { version = "~1.20", default-features = false, features = ["macros", "rt-multi-thread", "time"] }  # LTS
 tokio-retry = "0.3"
 toml = { version = "0.5", features = ["preserve_order"] }
+zbus = "3.8.0"
+futures = "0.3.26"
 
 [dev-dependencies]
 tempfile = "3"

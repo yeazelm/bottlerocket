@@ -71,6 +71,9 @@ skip-tree = [
     # dependency tree because windows-sys has many sub-crates
     # that differ in major version.
     { name = "windows-sys", version = "=0.42.0" },
+    # gptman is locked to older nix but is fine to move up
+    # https://github.com/rust-disk-partition-management/gptman/pull/113
+    { name = "nix", version = "0.24.3" }
 ]
 
 [sources]
