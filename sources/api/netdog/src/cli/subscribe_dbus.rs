@@ -151,12 +151,14 @@ trait NetworkManager {
     default_service = "org.freedesktop.Network1",
     interface = "org.freedesktop.Network1.Client"
 )]
-trait Client {
-    fn start(&self) -> Result<()>;
-    fn stop(&self) -> Result<()>;
 
-    #[dbus_proxy(property)]
-    fn set_desktop_id(&mut self, id: &str) -> Result<()>;
+
+struct NetworkdLeaseInfo {
+
+}
+
+fn fetch_networkd_lease(link_id: i8) -> Result<NetworkdLeaseInfo> {
+    Ok(NetworkdLeaseInfo {  })
 }
 
 pub(crate) async fn run() -> Result<()> {
@@ -215,12 +217,12 @@ pub(crate) async fn run() -> Result<()> {
 
     // This could be done better, but an Option seemed fine for now
     let mut path_to_primary: Option<&OwnedObjectPath> = None;
+    let primary_interface = primary_interface_name()?;
 
     // Iterate over the links found by list_links()
     for (id, name, path) in links.iter() {
         println!("Link id: {id} Name: {name} Path: {path:?}");
-        // I'm hard coding my QEMU interface but we can switch to true primary interface soon
-        if name == "enp0s16" {
+        if name == primary_interface {
             // Now grab the Properties path from the listing to start watching for changes
             path_to_primary = Some(&path);
         }
@@ -246,6 +248,10 @@ pub(crate) async fn run() -> Result<()> {
                 name,
                 value
             );
+            if value == "configured" {
+                // do the thing, we are pretty bespoke to DHCP, maybe that is fine?
+                // Call netdog with a similar interface to install.rs
+            }
         }
     };
     };
