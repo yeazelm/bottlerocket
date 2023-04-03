@@ -36,6 +36,7 @@ mod dns;
 mod interface_id;
 mod lease;
 mod net_config;
+mod networkd_status;
 mod wicked;
 
 use argh::FromArgs;
@@ -52,6 +53,7 @@ static OVERRIDE_NET_CONFIG_FILE: &str = "/var/lib/netdog/net.toml";
 static PRIMARY_SYSCTL_CONF: &str = "/etc/sysctl.d/90-primary_interface.conf";
 static SYSCTL_MARKER_FILE: &str = "/run/netdog/primary_sysctls_set";
 static SYSTEMD_SYSCTL: &str = "/usr/lib/systemd/systemd-sysctl";
+static NETWORKCTL: &str = "/usr/bin/networkctl";
 static LEASE_DIR: &str = "/run/wicked";
 static SYS_CLASS_NET: &str = "/sys/class/net";
 
@@ -73,6 +75,8 @@ enum SubCommand {
     SetHostname(cli::SetHostnameArgs),
     WriteResolvConf(cli::WriteResolvConfArgs),
     SubscribeDbus(cli::SubscribeDbusArgs),
+    PrimaryInterface(cli::PrimaryInterfaceArgs),
+    UpdateResponder(cli::UpdateResponderArgs),
 }
 
 async fn run() -> cli::Result<()> {
@@ -86,6 +90,8 @@ async fn run() -> cli::Result<()> {
         SubCommand::SetHostname(args) => cli::set_hostname::run(args)?,
         SubCommand::WriteResolvConf(_) => cli::write_resolv_conf::run()?,
         SubCommand::SubscribeDbus(_) => cli::subscribe_dbus::run().await?,
+        SubCommand::PrimaryInterface(_) => cli::primary_interface::run()?,
+        SubCommand::UpdateResponder(_) => cli::update_responder::run()?,
     }
     Ok(())
 }

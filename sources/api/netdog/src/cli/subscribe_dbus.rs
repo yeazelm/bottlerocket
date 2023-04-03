@@ -1,5 +1,3 @@
-use std::path;
-
 use argh::FromArgs;
 use futures::stream::StreamExt;
 use tokio;
@@ -151,36 +149,21 @@ trait NetworkManager {
     default_service = "org.freedesktop.Network1",
     interface = "org.freedesktop.Network1.Client"
 )]
+trait Client {
+    fn start(&self) -> Result<()>;
+    fn stop(&self) -> Result<()>;
 
-
-struct NetworkdLeaseInfo {
-
-}
-
-fn fetch_networkd_lease(link_id: i8) -> Result<NetworkdLeaseInfo> {
-    Ok(NetworkdLeaseInfo {  })
+    #[dbus_proxy(property)]
+    fn set_desktop_id(&mut self, id: &str) -> Result<()>;
 }
 
 pub(crate) async fn run() -> Result<()> {
-
-    /*
-    This is a work in progress monolith to try different things. It exists in netdog because eventually the things
-    it will do are very close to netdog. We probably need a new thing that is long living but this works to prove out
-    concepts.
-
-    The first part is mostly about trying out the low level API to dbus through the zbus library and the higher level
-    Proxy macro-generated API as well.
-
-    There is a lot of async assumptions in here, right now I'm not truly doing any async but effort will need to be put
-    into switching to tokio since that is already in play at the moment. 
-     */
     println!("Starting connections");
+    println!("try1");
     let conn = Connection::system().await;
     eprintln!("{:?}", conn);
     let conn = conn.unwrap();
     println!("Creating manager");
-
-    // Prove out the example of connecting to the generic Systemd DBus Manager can print things on Bottlerocket
     let proxy = SystemdManagerProxy::new(&conn).await?;
     println!("Host architecture: {}", proxy.architecture().await?);
     println!("Environment:");
@@ -188,73 +171,111 @@ pub(crate) async fn run() -> Result<()> {
         println!("  {}", env);
     }
 
-    // Try out the low level call_method functionality to prove out we can talk to Networkd DBus interfaces
     let reply = conn
-    .call_method(
-        Some("org.freedesktop.network1"),
-        "/org/freedesktop/network1",
-        Some("org.freedesktop.network1.Manager"),
-        "ListLinks",
-        &(),
-    )
-    .await?;
+        .call_method(
+            Some("org.freedesktop.network1"),
+            "/org/freedesktop/network1",
+            Some("org.freedesktop.network1.Manager"),
+            "ListLinks",
+            &(),
+        )
+        .await?;
 
     println!("Called, printing body next");
-
+    // let names: Vec<()> = reply.body()?;
     let links: Vec<(i32, String, OwnedObjectPath)> = reply.body()?;
+    // for name in names.iter() {
+    //     println!("{}", name);
+    // }
     for (id, name, path) in links.iter() {
         println!("Link id: {id} Name: {name} Path: {path:?}");
     }
 
-    // This does the same thing as the low level, but with the generated NetworkManagerProxy
     let manager = NetworkManagerProxy::new(&conn).await?;
     println!("Network manager created, getting client");
     let link_list = manager.list_links().await;
-    
-    // Prove out you can debug the response
+
     eprintln!("{:?}", link_list);
     let links = link_list.unwrap();
 
-    // This could be done better, but an Option seemed fine for now
+    let mut primary: &i32 = &0;
     let mut path_to_primary: Option<&OwnedObjectPath> = None;
-    let primary_interface = primary_interface_name()?;
-
-    // Iterate over the links found by list_links()
     for (id, name, path) in links.iter() {
         println!("Link id: {id} Name: {name} Path: {path:?}");
-        if name == primary_interface {
-            // Now grab the Properties path from the listing to start watching for changes
+        if name == "eth0" {
+            primary = id;
             path_to_primary = Some(&path);
-        }
+        };
     }
+    //let mut client = manager.get_client().await?;
+    println!("built client");
+    // Set the client for connecting to dbus
+    //client.set_desktop_id("org.freedesktop.zbus").await?;
 
-    // If we found the primary device, start listing to events
+    let dest = format!("org.freedesktop.network1/link/{}", primary);
+    println!("{}", dest);
+
     if let Some(p) = path_to_primary {
         let links = zbus::fdo::PropertiesProxy::builder(&conn)
-        .destination("org.freedesktop.network1")?
-        .path(p)?
-        .build()
-        .await?;
-    let mut link_props_changed = links.receive_properties_changed().await?;
-    // Build a loop to just wait for events, this would be the core of a real long running system, in theory we could
-    // spin up multiple async loops at once to listen on multiple things or respond to OS signals 
-    while let Some(signal) = link_props_changed.next().await {
-        let args = signal.args()?;
+            .destination("org.freedesktop.network1")?
+            .path(p)?
+            .build()
+            .await?;
+        let mut link_props_changed = links.receive_properties_changed().await?;
+        while let Some(signal) = link_props_changed.next().await {
+            let args = signal.args()?;
 
-        for (name, value) in args.changed_properties().iter() {
-            println!(
-                "{}.{} changed to `{:?}`",
-                args.interface_name(),
-                name,
-                value
-            );
-            if value == "configured" {
-                // do the thing, we are pretty bespoke to DHCP, maybe that is fine?
-                // Call netdog with a similar interface to install.rs
+            for (name, value) in args.changed_properties().iter() {
+                println!(
+                    "{}.{} changed to `{:?}`",
+                    args.interface_name(),
+                    name,
+                    value
+                );
             }
         }
     };
-    };
+
+    //let links = zbus::fdo::PropertiesProxy::builder(&conn)
+    //    .destination("org.freedesktop.network1")?
+    //    .path(&links[1].2)?
+    //    .build()
+    //    .await?;
+    //let mut link_props_changed = links.receive_properties_changed().await?;
+
+    //client.start().await?;
+
+    // let links = link_list.clone();
+
+    // for (id, name, path) in links.iter() {
+    //     println!("Link id: {id} Name: {name} Path: {path:?}");
+    // }
+
+    //while let Some(signal) = link_props_changed.next().await {
+    //    let args = signal.args()?;
+
+    //    for (name, value) in args.changed_properties().iter() {
+    //        println!(
+    //            "{}.{} changed to `{:?}`",
+    //            args.interface_name(),
+    //            name,
+    //            value
+    //        );
+    //    }
+    //}
+    // tokio::try_join!(
+    //     async {
+    //         while let Some(signal) = link_props_changed.next().await {
+    //             let args = signal.args()?;
+
+    //             for (name, value) in args.changed_properties().iter() {
+    //                 println!("{}.{} changed to `{:?}`", args.interface_name(), name, value);
+    //             }
+    //         }
+    //         Ok::<(), zbus::Error>(())
+    //     }
+
+    // )?;
 
     Ok(())
 }
