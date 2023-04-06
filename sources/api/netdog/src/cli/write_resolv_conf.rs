@@ -1,5 +1,6 @@
 use super::{error, primary_interface_name, Result};
 use crate::dns::DnsSettings;
+#[cfg(net_backed = "wicked")]
 use crate::lease::{dhcp_lease_path, LeaseInfo};
 #[cfg(net_backend = "systemd-networkd")]
 use crate::networkd_status::get_link_status;
@@ -14,7 +15,9 @@ pub(crate) struct WriteResolvConfArgs {}
 #[cfg(net_backend = "systemd-networkd")]
 fn get_dns_settings(primary_interface: String) -> Result<DnsSettings> {
     let primary_link_status = get_link_status(primary_interface).unwrap();
-    Ok(DnsSettings::new().unwrap())
+    let dns_settings = DnsSettings::from_config_or_status(&primary_link_status)
+        .context(error::GetDnsSettingsSnafu)?;
+    Ok(dns_settings)
 }
 
 #[cfg(net_backend = "wicked")]

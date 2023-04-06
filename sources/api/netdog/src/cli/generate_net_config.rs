@@ -7,6 +7,7 @@ use crate::{
 };
 use argh::FromArgs;
 use snafu::{OptionExt, ResultExt};
+use std::convert::TryFrom;
 use std::fs;
 use std::path::Path;
 
@@ -17,6 +18,10 @@ pub(crate) struct GenerateNetConfigArgs {}
 
 /// Generate configuration for network interfaces.
 pub(crate) fn run() -> Result<()> {
+    //Temporarily force a config write
+    use crate::interface_id::InterfaceName;
+    let primary_interface: InterfaceId = InterfaceId::Name(InterfaceName::try_from("enp0s16").unwrap());
+    write_primary_interface(&primary_interface)?;
     return Ok(());
     let maybe_net_config = if Path::exists(Path::new(OVERRIDE_NET_CONFIG_FILE)) {
         net_config::from_path(OVERRIDE_NET_CONFIG_FILE).context(error::NetConfigParseSnafu {

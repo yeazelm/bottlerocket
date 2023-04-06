@@ -74,8 +74,11 @@ enum SubCommand {
     GenerateNetConfig(cli::GenerateNetConfigArgs),
     SetHostname(cli::SetHostnameArgs),
     WriteResolvConf(cli::WriteResolvConfArgs),
+    #[cfg(net_backend = "systemd-networkd")]
     SubscribeDbus(cli::SubscribeDbusArgs),
+    #[cfg(net_backend = "systemd-networkd")]
     PrimaryInterface(cli::PrimaryInterfaceArgs),
+    #[cfg(net_backend = "systemd-networkd")]
     UpdateResponder(cli::UpdateResponderArgs),
 }
 
@@ -89,8 +92,11 @@ async fn run() -> cli::Result<()> {
         SubCommand::GenerateNetConfig(_) => cli::generate_net_config::run()?,
         SubCommand::SetHostname(args) => cli::set_hostname::run(args)?,
         SubCommand::WriteResolvConf(_) => cli::write_resolv_conf::run()?,
+        #[cfg(net_backend = "systemd-networkd")]
         SubCommand::SubscribeDbus(_) => cli::subscribe_dbus::run().await?,
+        #[cfg(net_backend = "systemd-networkd")]
         SubCommand::PrimaryInterface(_) => cli::primary_interface::run()?,
+        #[cfg(net_backend = "systemd-networkd")]
         SubCommand::UpdateResponder(_) => cli::update_responder::run()?,
     }
     Ok(())

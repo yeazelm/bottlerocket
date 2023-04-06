@@ -1,15 +1,14 @@
 use super::{error, primary_interface_name, Result};
 use crate::dns::DnsSettings;
-use crate::networkd_status::{get_link_status, NetworkctlIpAddr, NetworkdStatus};
+use crate::networkd_status::{get_link_status, NetworkdStatus};
 use crate::{CURRENT_IP, PRIMARY_SYSCTL_CONF, SYSCTL_MARKER_FILE, SYSTEMD_SYSCTL};
-use crate::{cli::print_json, interface_id::InterfaceName};
 use argh::FromArgs;
 use snafu::{ensure, ResultExt};
 use std::fmt::Write;
 use std::fs;
 use std::net::IpAddr;
+use std::path::Path;
 use std::process::Command;
-use std::path::{Path, PathBuf};
 
 #[derive(FromArgs, PartialEq, Debug)]
 #[argh(subcommand, name = "update-responder")]
@@ -18,18 +17,17 @@ pub(crate) struct UpdateResponderArgs {}
 
 /// Updates the various files needed when responding to events
 pub(crate) fn run() -> Result<()> {
-    // let primary_interface = primary_interface_name()?;
+    let primary_interface = primary_interface_name()?;
 
-    let primary_interface = "enp0s16".to_string();
+    // hardcode for on-box tests
+    // let primary_interface = "enp0s16".to_string();
+    // end hardcode
 
     let primary_link_status = get_link_status(primary_interface.clone()).unwrap();
-    // println!("{:?}", primary_link_status);
 
     // This would be write_current_ip
-    let primary_ip = &primary_link_status.primary_address();
-    println!("{}", &primary_ip);
-    // let addr = &primary_link_status.primary_address();
-    write_current_ip(&primary_ip)?; //TODO this doesn't error out if you can't write the file...
+    let primary_ip = &primary_link_status.primary_address().unwrap();
+    write_current_ip(primary_ip)?;
 
     // Write out resolv.conf
     write_resolv_conf(&primary_link_status)?;
@@ -102,4 +100,18 @@ fn write_resolv_conf(status: &NetworkdStatus) -> Result<()> {
     dns_settings
         .write_resolv_conf()
         .context(error::ResolvConfWriteFailedSnafu)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_sysctls() {
+        let interface = "eno1";
+        let fake_file = tempfile::NamedTempFile::new().unwrap();
+        let expected = "-net.ipv6.conf.eno1.accept_ra = 2\n-net.ipv4.conf.eno1.rp_filter = 2\n";
+        write_interface_sysctl(interface, &fake_file).unwrap();
+        assert_eq!(std::fs::read_to_string(&fake_file).unwrap(), expected);
+    }
 }

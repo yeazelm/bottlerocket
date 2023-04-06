@@ -14,13 +14,16 @@ pub(crate) use generate_hostname::GenerateHostnameArgs;
 pub(crate) use generate_net_config::GenerateNetConfigArgs;
 pub(crate) use install::InstallArgs;
 pub(crate) use node_ip::NodeIpArgs;
+#[cfg(net_backend = "systemd-networkd")]
 pub(crate) use primary_interface::PrimaryInterfaceArgs;
 pub(crate) use remove::RemoveArgs;
 use serde::{Deserialize, Serialize};
 pub(crate) use set_hostname::SetHostnameArgs;
 use snafu::{OptionExt, ResultExt};
 use std::fs;
+#[cfg(net_backend = "systemd-networkd")]
 pub(crate) use subscribe_dbus::SubscribeDbusArgs;
+#[cfg(net_backend = "systemd-networkd")]
 pub(crate) use update_responder::UpdateResponderArgs;
 pub(crate) use write_resolv_conf::WriteResolvConfArgs;
 

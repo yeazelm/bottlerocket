@@ -48,6 +48,7 @@ Source119: reboot-if-required.service
 Source120: warm-pool-wait.service
 Source121: disable-udp-offload.service
 Source122: has-boot-ever-succeeded.service
+Source190: force-dns-config.service
 
 # 2xx sources: tmpfilesd configs
 Source200: migration-tmpfiles.conf
@@ -414,6 +415,7 @@ install -p -m 0644 \
   %{S:100} %{S:101} %{S:102} %{S:103} %{S:105} \
   %{S:106} %{S:107} %{S:110} %{S:111} %{S:112} \
   %{S:113} %{S:114} %{S:118} %{S:119} %{S:122} \
+  %{S:190} \
   %{buildroot}%{_cross_unitdir}
 
 %if %{with nvidia_flavor}
@@ -476,7 +478,7 @@ install -p -m 0644 %{S:121} %{buildroot}%{_cross_unitdir}
 %if %{with vmware_platform}
 %{_cross_unitdir}/disable-udp-offload.service
 %endif
-
+%{_cross_unitdir}/force-dns-config.service
 
 %files -n %{_cross_os}corndog
 %{_cross_bindir}/corndog

@@ -2,8 +2,8 @@
 //! supplementing with DHCP lease if it exists.  It also contains the code necessary to write a
 //! properly formatted `resolv.conf`.
 use crate::lease::LeaseInfo;
-use crate::RESOLV_CONF;
 use crate::networkd_status::NetworkdStatus;
+use crate::RESOLV_CONF;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use serde::Deserialize;
@@ -25,11 +25,6 @@ pub(crate) struct DnsSettings {
 }
 
 impl DnsSettings {
-    /// Create empty for stubbing things
-    pub(crate) fn new() -> Result<Self> {
-        Ok(DnsSettings::default())
-    }
- 
     /// Create a DnsSettings from TOML config file, supplementing missing settings with settings
     /// from DHCP lease if provided.  (In the case of static addressing, a DHCP lease won't exist)
     pub(crate) fn from_config_or_lease(lease: Option<&LeaseInfo>) -> Result<Self> {
@@ -39,7 +34,6 @@ impl DnsSettings {
         }
         Ok(settings)
     }
-
 
     /// Merge missing DNS settings into `self` using DHCP lease
     fn merge_lease(&mut self, lease: &LeaseInfo) {
@@ -52,8 +46,8 @@ impl DnsSettings {
         }
     }
 
-    /// Create a DnsSettings from TOML config file, supplementing missing settings from data in 
-    /// the NetworkdStatus. 
+    /// Create a DnsSettings from TOML config file, supplementing missing settings from data in
+    /// the NetworkdStatus.
     pub(crate) fn from_config_or_status(status: &NetworkdStatus) -> Result<Self> {
         let mut settings = Self::from_config()?;
         settings.merge_status(status);
@@ -64,13 +58,13 @@ impl DnsSettings {
         // This is probably actually a Vec of DNS configs?
         if self.nameservers.is_none() {
             if let Some(dns_nameservers) = &status.dns {
-                self.nameservers = Some(dns_nameservers.into_iter().map(|n| n.address).collect());
+                self.nameservers = Some(dns_nameservers.iter().map(|n| n.address).collect());
             }
         }
 
         if self.search.is_none() {
             if let Some(search_domains) = &status.search_domains {
-                self.search = Some(search_domains.into_iter().map(|d| d.domain.clone()).collect());
+                self.search = Some(search_domains.iter().map(|d| d.domain.clone()).collect());
             }
         }
     }
