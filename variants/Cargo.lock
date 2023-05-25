@@ -28,6 +28,7 @@ dependencies = [
  "iputils",
  "kernel-5_15",
  "login",
+ "radvd",
  "release",
  "strace",
  "tcpdump",
@@ -968,6 +969,13 @@ dependencies = [
  "glibc",
  "libncurses",
  "libselinux",
+]
+
+[[package]]
+name = "radvd"
+version = "0.1.0"
+dependencies = [
+ "glibc",
 ]
 
 [[package]]

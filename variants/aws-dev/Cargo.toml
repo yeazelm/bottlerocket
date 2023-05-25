@@ -36,6 +36,7 @@ included-packages = [
     "strace",
     "tcpdump",
     "chrony-tools",
+    "radvd",
 ]
 
 [lib]
@@ -56,3 +57,4 @@ iputils = { path = "../../packages/iputils" }
 strace = { path = "../../packages/strace" }
 tcpdump = { path = "../../packages/tcpdump" }
 chrony = { path = "../../packages/chrony" }
+radvd = { path = "../../packages/radvd" }

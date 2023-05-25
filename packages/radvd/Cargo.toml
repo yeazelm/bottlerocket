@@ -1,0 +1,19 @@
+[package]
+name = "radvd"
+version = "0.1.0"
+edition = "2021"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "pkg.rs"
+
+[package.metadata.build-package]
+releases-url = "http://www.litech.org/radvd/"
+
+[[package.metadata.build-package.external-files]]
+url = "https://radvd.litech.org/dist/radvd-2.19.tar.gz"
+sha512 = "caa621fd77e34ff6858d60a41b0ee02aff967ac14f2b84c402359744f4bece5c1563419860431c328adc0385e9893ed1f2421d652247a3aa0dfc0aaad1e01233"
+
+[build-dependencies]
+glibc = { path = "../glibc" }

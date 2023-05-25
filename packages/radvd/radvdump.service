@@ -1,0 +1,10 @@
+[Unit]
+Description=Dumps data from dadvdump to the journal
+Before=network-pre.target
+
+[Service]
+Type=exec
+ExecStart=/usr/sbin/radvdump
+
+[Install]
+WantedBy=network-pre.target
