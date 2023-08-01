@@ -115,6 +115,7 @@ impl PackageBuilder {
             ("BUILDSYS_VARIANT_FAMILY", "VARIANT_FAMILY"),
             ("BUILDSYS_VARIANT_FLAVOR", "VARIANT_FLAVOR"),
             ("PUBLISH_REPO", "REPO"),
+            ("BUILDSYS_CACERTS_BUNDLE", "CABUNDLE"),
         ] {
             let src_env_val =
                 env::var(src_env_var).context(error::EnvironmentSnafu { var: src_env_var })?;

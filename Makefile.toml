@@ -12,6 +12,8 @@ BUILDSYS_TOOLS_DIR = "${BUILDSYS_ROOT_DIR}/tools"
 BUILDSYS_SOURCES_DIR = "${BUILDSYS_ROOT_DIR}/sources"
 BUILDSYS_SBKEYS_DIR = "${BUILDSYS_ROOT_DIR}/sbkeys"
 BUILDSYS_SBKEYS_PROFILE = { script = ['echo "${BUILDSYS_SBKEYS_PROFILE:-local}"'] }
+BUILDSYS_CACERTS_DIR = "${BUILDSYS_ROOT_DIR}/certs"
+BUILDSYS_CACERTS_BUNDLE = { script = ['echo "${BUILDSYS_CACERTS_BUNDLE:-${BUILDSYS_CACERTS_DIR}/ca-bundle.crt}"'] }
 BUILDSYS_TIMESTAMP = { script = ["date +%s"] }
 BUILDSYS_VERSION_BUILD = { script = ["git describe --always --dirty --exclude '*' || echo 00000000"] }
 # For now, release config path can't be overridden with -e, because it's used
@@ -732,6 +734,34 @@ ${BUILDSYS_SBKEYS_DIR}/generate-local-sbkeys \
 '''
 ]
 
+[tasks.build-cacerts-bundle]
+dependencies = ["check-cargo-version", "fetch-sdk", "build-tools"]
+script_runner = "bash"
+script = [
+'''
+set -e
+
+export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
+
+# Parse the variant into its components and set additional variables.
+eval "$(bottlerocket-variant)"
+export BUILDSYS_VARIANT_PLATFORM="${BUILDSYS_VARIANT_PLATFORM:?}"
+export BUILDSYS_VARIANT_RUNTIME="${BUILDSYS_VARIANT_RUNTIME:?}"
+export BUILDSYS_VARIANT_FAMILY="${BUILDSYS_VARIANT_FAMILY:?}"
+export BUILDSYS_VARIANT_FLAVOR="${BUILDSYS_VARIANT_FLAVOR}"
+export BUILDSYS_CACERTS_BUNDLE="${BUILDSYS_CACERTS_BUNDLE}"
+
+# Save built artifacts for each architecture.  We don't set this everywhere
+# because we build host tools with cargo as well, like buildsys and pubsys.
+export CARGO_TARGET_DIR=${BUILDSYS_ROOT_DIR}/variants/target/${BUILDSYS_ARCH}
+
+cargo build \
+  ${CARGO_BUILD_ARGS} \
+  ${CARGO_MAKE_CARGO_ARGS} \
+  --manifest-path "certs/Cargo.toml"
+'''
+]
+
 # We need Cargo version 1.51 or higher in order to build a workspace's
 # dependency during build-package
 [tasks.check-cargo-version]
@@ -811,7 +841,7 @@ docker run --rm \
 
 # Builds a package including its build-time and runtime dependency packages.
 [tasks.build-package]
-dependencies = ["check-cargo-version", "fetch-sdk", "build-tools", "publish-setup", "fetch-licenses"]
+dependencies = ["check-cargo-version", "fetch-sdk", "build-tools", "build-cacerts-bundle", "publish-setup", "fetch-licenses"]
 script_runner = "bash"
 script = [
 '''
@@ -830,6 +860,7 @@ export BUILDSYS_VARIANT_PLATFORM="${BUILDSYS_VARIANT_PLATFORM:?}"
 export BUILDSYS_VARIANT_RUNTIME="${BUILDSYS_VARIANT_RUNTIME:?}"
 export BUILDSYS_VARIANT_FAMILY="${BUILDSYS_VARIANT_FAMILY:?}"
 export BUILDSYS_VARIANT_FLAVOR="${BUILDSYS_VARIANT_FLAVOR}"
+export BUILDSYS_CACERTS_BUNDLE="${BUILDSYS_CACERTS_BUNDLE}"
 
 # Save built artifacts for each architecture.  We don't set this everywhere
 # because we build host tools with cargo as well, like buildsys and pubsys.
@@ -844,7 +875,7 @@ cargo build \
 ]
 
 [tasks.build-variant]
-dependencies = ["fetch-sdk", "build-tools", "build-sbkeys", "publish-setup"]
+dependencies = ["fetch-sdk", "build-tools", "build-sbkeys", "build-cacerts-bundle", "publish-setup"]
 script = [
 '''
 export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
@@ -855,6 +886,7 @@ export BUILDSYS_VARIANT_PLATFORM="${BUILDSYS_VARIANT_PLATFORM:?}"
 export BUILDSYS_VARIANT_RUNTIME="${BUILDSYS_VARIANT_RUNTIME:?}"
 export BUILDSYS_VARIANT_FAMILY="${BUILDSYS_VARIANT_FAMILY:?}"
 export BUILDSYS_VARIANT_FLAVOR="${BUILDSYS_VARIANT_FLAVOR}"
+export BUILDSYS_CACERTS_BUNDLE="${BUILDSYS_CACERTS_BUNDLE}"
 
 # Save built artifacts for each architecture.  We don't set this everywhere
 # because we build host tools with cargo as well, like buildsys and pubsys.

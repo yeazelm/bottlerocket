@@ -23,11 +23,13 @@ use serde::Deserialize;
 use snafu::{ensure, ResultExt};
 use spec::SpecInfo;
 use std::env;
-use std::path::PathBuf;
+use std::path::{PathBuf,Path};
 use std::process;
+use std::fs::copy;
 
 mod error {
     use snafu::Snafu;
+    use std::path::PathBuf;
 
     #[derive(Debug, Snafu)]
     #[snafu(visibility(pub(super)))]
@@ -77,6 +79,17 @@ mod error {
             arch: String,
             supported_arches: Vec<String>,
         },
+
+        #[snafu(display("Unable to copy provided bundle at {} to {}: {}", destination.display(), target.display(), source))]
+        CaBundleFileCreate {
+            destination: PathBuf,
+            target: PathBuf,
+            source: std::io::Error,
+        },
+
+        #[snafu(display("Unable to fetch CA Bundle"))]
+        FailedFetchCaBundle {},
+
     }
 }
 
@@ -87,6 +100,7 @@ type Result<T> = std::result::Result<T, error::Error>;
 enum Command {
     BuildPackage,
     BuildVariant,
+    FetchCacerts,
 }
 
 fn usage() -> ! {
@@ -97,7 +111,8 @@ USAGE:
 
 SUBCOMMANDS:
     build-package           Build RPMs from a spec file and sources.
-    build-variant           Build filesystem and disk images from RPMs."
+    build-variant           Build filesystem and disk images from RPMs.
+    fetch-cacerts           Fetch CA Certificate bundle."
     );
     process::exit(1)
 }
@@ -120,6 +135,7 @@ fn run() -> Result<()> {
     match command {
         Command::BuildPackage => build_package()?,
         Command::BuildVariant => build_variant()?,
+        Command::FetchCacerts => fetch_cacerts()?,
     }
     Ok(())
 }
@@ -265,6 +281,37 @@ fn build_variant() -> Result<()> {
     } else {
         println!("cargo:warning=No included packages in manifest. Skipping variant build.");
     }
+
+    Ok(())
+}
+
+fn fetch_cacerts() -> Result<()> {
+
+    let ca_file: PathBuf = getenv("BUILDSYS_CACERTS_BUNDLE")?.into();
+    let ca_bundle_dir: PathBuf = getenv("BUILDSYS_CACERTS_DIR")?.into();
+    // This path is used in the %_ca_bundle macro
+    let buildsys_bundle_path: PathBuf = Path::new(&ca_bundle_dir).join("ca-bundle.crt");
+    // If the provided file exists, move this file to the macro path
+    if ca_file.is_file() {
+        if ca_file.as_path() != buildsys_bundle_path.as_path() {
+            println!("Moving specfied file to build location: {}", &buildsys_bundle_path.display());
+            copy(&ca_file, &buildsys_bundle_path).context(error::CaBundleFileCreateSnafu { destination: &ca_file, target: &buildsys_bundle_path })?;
+        }
+        return Ok(())
+    }
+    let manifest_dir: PathBuf = getenv("CARGO_MANIFEST_DIR")?.into();
+    let manifest_file = "Cargo.toml";
+    println!("cargo:rerun-if-changed={}", manifest_file);
+    let manifest =
+        ManifestInfo::new(manifest_dir.join(manifest_file)).context(error::ManifestParseSnafu)?;
+
+    if let Some(files) = manifest.external_files() {
+        LookasideCache::fetch(files).context(error::ExternalFileFetchSnafu)?;
+    }
+    ensure!(
+        buildsys_bundle_path.is_file(),
+        error::FailedFetchCaBundleSnafu{},
+    );
 
     Ok(())
 }

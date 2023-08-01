@@ -6,7 +6,7 @@ License: MPL-2.0
 # Note: You can see changes here:
 # https://hg.mozilla.org/projects/nss/log/tip/lib/ckfw/builtins/certdata.txt
 URL: https://curl.haxx.se/docs/caextract.html
-Source0: https://curl.haxx.se/ca/cacert-2023-01-10.pem
+#Source0: https://curl.haxx.se/ca/cacert-2023-01-10.pem
 Source1: ca-certificates-tmpfiles.conf
 
 %description
@@ -18,7 +18,7 @@ Source1: ca-certificates-tmpfiles.conf
 
 %install
 install -d %{buildroot}%{_cross_factorydir}%{_cross_sysconfdir}/pki/tls/certs
-install -p -m 0644 %{S:0} %{buildroot}%{_cross_factorydir}%{_cross_sysconfdir}/pki/tls/certs/ca-bundle.crt
+install -p -m 0644 %{_ca_bundle} %{buildroot}%{_cross_factorydir}%{_cross_sysconfdir}/pki/tls/certs/ca-bundle.crt
 
 install -d %{buildroot}%{_cross_tmpfilesdir}
 install -p -m 0644 %{S:1} %{buildroot}%{_cross_tmpfilesdir}/ca-certificates.conf

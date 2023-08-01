@@ -78,6 +78,7 @@ WORKDIR /home/builder
 USER builder
 ENV PACKAGE=${PACKAGE} ARCH=${ARCH}
 COPY --chown=builder roles/${REPO}.root.json ./rpmbuild/BUILD/root.json
+COPY --chown=builder certs/ca-bundle.crt ./rpmbuild/BUILD/ca-bundle.crt
 # We attempt to copy `Licenses.toml` and `licenses` for the current build, otherwise
 # an empty file and a directory are created so that `bottlerocket-license-tool` will
 # fail with a more descriptive error message.
@@ -96,6 +97,7 @@ RUN rpmdev-setuptree \
    && echo "%_cross_variant_family ${VARIANT_FAMILY}" >> .rpmmacros \
    && echo "%_cross_variant_flavor ${VARIANT_FAMILY:-none}" >> .rpmmacros \
    && echo "%_cross_repo_root_json %{_builddir}/root.json" >> .rpmmacros \
+   && echo "%_ca_bundle %{_builddir}/ca-bundle.crt" >> .rpmmacros \
    && echo "%_topdir /home/builder/rpmbuild" >> .rpmmacros \
    && echo "%bcond_without $(V=${VARIANT_PLATFORM,,}; echo ${V//-/_})_platform" > .bconds \
    && echo "%bcond_without $(V=${VARIANT_RUNTIME,,}; echo ${V//-/_})_runtime" >> .bconds \
