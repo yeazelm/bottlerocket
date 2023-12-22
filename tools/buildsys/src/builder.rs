@@ -237,11 +237,115 @@ impl VariantBuilder {
     }
 }
 
+
+pub(crate) struct ImageModifier;
+
+impl ImageModifier {
+    /// Modify a built image with specified changes
+    pub(crate) fn build(
+        image_format: Option<&ImageFormat>,
+        image_layout: Option<&ImageLayout>,
+        kernel_parameters: Option<&Vec<String>>,
+        image_features: Option<HashSet<&ImageFeature>>,
+    ) -> Result<Self> {
+
+    let output_dir: PathBuf = getenv("BUILDSYS_OUTPUT_DIR")?.into();
+    let variant = getenv("BUILDSYS_VARIANT")?;
+    let arch = getenv("BUILDSYS_ARCH")?;
+    let goarch = serde_plain::from_str::<SupportedArch>(&arch)
+        .context(error::UnsupportedArchSnafu { arch: &arch })?
+        .goarch();
+
+    let image_layout = image_layout.cloned().unwrap_or_default();
+    let ImageLayout {
+        os_image_size_gib,
+        data_image_size_gib,
+        partition_plan,
+        ..
+    } = image_layout;
+
+    let (os_image_publish_size_gib, data_image_publish_size_gib) =
+        image_layout.publish_image_sizes_gib();
+
+    let mut args = Vec::new();
+    args.push("--network".into());
+    args.push("host".into());
+    args.build_arg("ARCH", &arch);
+    args.build_arg("GOARCH", goarch);
+    args.build_arg("VARIANT", &variant);
+    args.build_arg("VERSION_ID", getenv("BUILDSYS_VERSION_IMAGE")?);
+    args.build_arg("BUILD_ID", getenv("BUILDSYS_VERSION_BUILD")?);
+    args.build_arg("PRETTY_NAME", getenv("BUILDSYS_PRETTY_NAME")?);
+    args.build_arg("IMAGE_NAME", getenv("BUILDSYS_NAME")?);
+    // We are assuming these files need to be modified in the environment so its safe to assume the paths are relative 
+    // args.build_arg("CA_BUNDLE", getenv("BUILDSYS_CACERTS_BUNDLE")?);
+    // This is set in development env not the main one... shrug 
+    args.build_arg("REPO", getenv("PUBLISH_REPO")?);
+    args.build_arg(
+        "IMAGE_FORMAT",
+        match image_format {
+            Some(ImageFormat::Raw) | None => "raw",
+            Some(ImageFormat::Qcow2) => "qcow2",
+            Some(ImageFormat::Vmdk) => "vmdk",
+        },
+    );
+    args.build_arg("OS_IMAGE_SIZE_GIB", format!("{}", os_image_size_gib));
+    args.build_arg("DATA_IMAGE_SIZE_GIB", format!("{}", data_image_size_gib));
+    args.build_arg(
+        "OS_IMAGE_PUBLISH_SIZE_GIB",
+        format!("{}", os_image_publish_size_gib),
+    );
+    args.build_arg(
+        "DATA_IMAGE_PUBLISH_SIZE_GIB",
+        format!("{}", data_image_publish_size_gib),
+    );
+    args.build_arg(
+        "PARTITION_PLAN",
+        match partition_plan {
+            PartitionPlan::Split => "split",
+            PartitionPlan::Unified => "unified",
+        },
+    );
+    args.build_arg(
+        "KERNEL_PARAMETERS",
+        kernel_parameters
+            .map(|v| v.join(" "))
+            .unwrap_or_else(|| "".to_string()),
+    );
+
+    if let Some(image_features) = image_features {
+        for image_feature in image_features.iter() {
+            args.build_arg(format!("{}", image_feature), "1");
+        }
+    }
+
+    // Add known secrets to the build argments.
+    add_secrets(&mut args)?;
+
+    // Add CA Bundle cert if specified
+    add_ca_bundle(&mut args)?;
+
+    // Always rebuild variants since they are located in a different workspace,
+    // and don't directly track changes in the underlying packages.
+    getenv("BUILDSYS_TIMESTAMP")?;
+
+    let tag = format!(
+        "buildsys-var-{variant}-{arch}",
+        variant = variant,
+        arch = arch
+    );
+
+    build(BuildType::Modify, &variant, &arch, args, &tag, &output_dir)?;
+    Ok(Self)
+    }
+}
+
 // =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=
 
 enum BuildType {
     Package,
     Variant,
+    Modify,
 }
 
 /// Invoke a series of `docker` commands to drive a package or variant build.
@@ -280,6 +384,7 @@ fn build(
     let target = match kind {
         BuildType::Package => "package",
         BuildType::Variant => "variant",
+        BuildType::Modify => "modify",
     };
 
     let mut build = format!(
@@ -418,6 +523,20 @@ fn add_secrets(args: &mut Vec<String>) -> Result<()> {
     Ok(())
 }
 
+
+fn add_ca_bundle(args: &mut Vec<String>) -> Result<()> {
+    let ca_bundle_var = "BUILDSYS_CACERTS_BUNDLE";
+    let ca_bundle_path: PathBuf = PathBuf::from(env::var(ca_bundle_var).context(error::EnvironmentSnafu { var: ca_bundle_var })?);
+
+    if ca_bundle_path.exists() {
+        args.build_secret(
+            "file",
+            "ca-bundle.crt",
+            &ca_bundle_path.to_string_lossy(),
+        );
+    };
+    Ok(())
+}
 // =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=   =^..^=
 
 /// Create a directory for build artifacts.
@@ -425,6 +544,7 @@ fn create_build_dir(kind: &BuildType, name: &str, arch: &str) -> Result<PathBuf>
     let prefix = match kind {
         BuildType::Package => "packages",
         BuildType::Variant => "variants",
+        BuildType::Modify => "modify",
     };
 
     let path = [&getenv("BUILDSYS_STATE_DIR")?, arch, prefix, name]

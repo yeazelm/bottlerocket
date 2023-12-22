@@ -26,6 +26,8 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
+use crate::builder::ImageModifier;
+
 mod error {
     use snafu::Snafu;
 
@@ -87,6 +89,7 @@ type Result<T> = std::result::Result<T, error::Error>;
 enum Command {
     BuildPackage,
     BuildVariant,
+    ModifyImage,
 }
 
 fn usage() -> ! {
@@ -97,7 +100,8 @@ USAGE:
 
 SUBCOMMANDS:
     build-package           Build RPMs from a spec file and sources.
-    build-variant           Build filesystem and disk images from RPMs."
+    build-variant           Build filesystem and disk images from RPMs
+    modify-image            Modify an existing disk image."
     );
     process::exit(1)
 }
@@ -120,6 +124,7 @@ fn run() -> Result<()> {
     match command {
         Command::BuildPackage => build_package()?,
         Command::BuildVariant => build_variant()?,
+        Command::ModifyImage => modify_image()?,
     }
     Ok(())
 }
@@ -265,6 +270,29 @@ fn build_variant() -> Result<()> {
     } else {
         println!("cargo:warning=No included packages in manifest. Skipping variant build.");
     }
+
+    Ok(())
+}
+
+fn modify_image() -> Result<()> {
+
+    let manifest_dir: PathBuf = getenv("CARGO_MANIFEST_DIR")?.into();
+    let manifest_file = "Cargo.toml";
+    println!("cargo:rerun-if-changed={}", manifest_file);
+
+    let manifest = ManifestInfo::new(manifest_dir.join(manifest_file)).context(error::ManifestParseSnafu)?;
+
+    let image_format = manifest.image_format();
+    let image_layout = manifest.image_layout();
+    let kernel_parameters = manifest.kernel_parameters();
+    let image_features = manifest.image_features();
+    ImageModifier::build(
+        image_format,
+        image_layout,
+        kernel_parameters,
+        image_features,
+    )
+    .context(error::BuildAttemptSnafu)?;
 
     Ok(())
 }

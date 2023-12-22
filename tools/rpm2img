@@ -79,39 +79,44 @@ if [ "${OUTPUT_FMT}" == "vmdk" ] ; then
   fi
 fi
 
+
+# import the image helper functions
+# shellcheck source=imagehelper
+. "${0%/*}/imagehelper"
+
 # Store output artifacts in a versioned directory.
-OUTPUT_DIR="${OUTPUT_DIR}/${VERSION_ID}-${BUILD_ID}"
-mkdir -p "${OUTPUT_DIR}"
+# OUTPUT_DIR="${OUTPUT_DIR}/${VERSION_ID}-${BUILD_ID}"
+# mkdir -p "${OUTPUT_DIR}"
 
-FILENAME_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}-${VERSION_ID}-${BUILD_ID}"
-SYMLINK_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}"
-VERSIONED_SYMLINK_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}-${VERSION_ID}"
-FRIENDLY_VERSIONED_SYMLINK_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}-v${VERSION_ID}"
+# FILENAME_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}-${VERSION_ID}-${BUILD_ID}"
+# SYMLINK_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}"
+# VERSIONED_SYMLINK_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}-${VERSION_ID}"
+# FRIENDLY_VERSIONED_SYMLINK_PREFIX="${IMAGE_NAME}-${VARIANT}-${ARCH}-v${VERSION_ID}"
 
-OS_IMAGE_NAME="${FILENAME_PREFIX}"
-OS_IMAGE_SYMLINK="${SYMLINK_PREFIX}"
-OS_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}"
-OS_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}"
+# OS_IMAGE_NAME="${FILENAME_PREFIX}"
+# OS_IMAGE_SYMLINK="${SYMLINK_PREFIX}"
+# OS_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}"
+# OS_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}"
 
-DATA_IMAGE_NAME="${FILENAME_PREFIX}-data"
-DATA_IMAGE_SYMLINK="${SYMLINK_PREFIX}-data"
-DATA_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-data"
-DATA_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-data"
+# DATA_IMAGE_NAME="${FILENAME_PREFIX}-data"
+# DATA_IMAGE_SYMLINK="${SYMLINK_PREFIX}-data"
+# DATA_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-data"
+# DATA_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-data"
 
-BOOT_IMAGE_NAME="${FILENAME_PREFIX}-boot.ext4.lz4"
-BOOT_IMAGE_SYMLINK="${SYMLINK_PREFIX}-boot.ext4.lz4"
-BOOT_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-boot.ext4.lz4"
-BOOT_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-boot.ext4.lz4"
+# BOOT_IMAGE_NAME="${FILENAME_PREFIX}-boot.ext4.lz4"
+# BOOT_IMAGE_SYMLINK="${SYMLINK_PREFIX}-boot.ext4.lz4"
+# BOOT_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-boot.ext4.lz4"
+# BOOT_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-boot.ext4.lz4"
 
-VERITY_IMAGE_NAME="${FILENAME_PREFIX}-root.verity.lz4"
-VERITY_IMAGE_SYMLINK="${SYMLINK_PREFIX}-root.verity.lz4"
-VERITY_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-root.verity.lz4"
-VERITY_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-root.verity.lz4"
+# VERITY_IMAGE_NAME="${FILENAME_PREFIX}-root.verity.lz4"
+# VERITY_IMAGE_SYMLINK="${SYMLINK_PREFIX}-root.verity.lz4"
+# VERITY_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-root.verity.lz4"
+# VERITY_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-root.verity.lz4"
 
-ROOT_IMAGE_NAME="${FILENAME_PREFIX}-root.ext4.lz4"
-ROOT_IMAGE_SYMLINK="${SYMLINK_PREFIX}-root.ext4.lz4"
-ROOT_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-root.ext4.lz4"
-ROOT_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-root.ext4.lz4"
+# ROOT_IMAGE_NAME="${FILENAME_PREFIX}-root.ext4.lz4"
+# ROOT_IMAGE_SYMLINK="${SYMLINK_PREFIX}-root.ext4.lz4"
+# ROOT_IMAGE_VERSIONED_SYMLINK="${VERSIONED_SYMLINK_PREFIX}-root.ext4.lz4"
+# ROOT_IMAGE_FRIENDLY_VERSIONED_SYMLINK="${FRIENDLY_VERSIONED_SYMLINK_PREFIX}-root.ext4.lz4"
 
 OS_IMAGE="$(mktemp)"
 BOOT_IMAGE="$(mktemp)"
@@ -128,21 +133,21 @@ DATA_MOUNT="$(mktemp -d)"
 EFI_MOUNT="$(mktemp -d)"
 PRIVATE_MOUNT="$(mktemp -d)"
 
-SBKEYS="${HOME}/sbkeys"
+# SBKEYS="${HOME}/sbkeys"
 
 SELINUX_ROOT="/etc/selinux"
 SELINUX_POLICY="fortified"
 SELINUX_FILE_CONTEXTS="${ROOT_MOUNT}/${SELINUX_ROOT}/${SELINUX_POLICY}/contexts/files/file_contexts"
 
-VERITY_VERSION=1
-VERITY_HASH_ALGORITHM=sha256
-VERITY_DATA_BLOCK_SIZE=4096
-VERITY_HASH_BLOCK_SIZE=4096
+# VERITY_VERSION=1
+# VERITY_HASH_ALGORITHM=sha256
+# VERITY_DATA_BLOCK_SIZE=4096
+# VERITY_HASH_BLOCK_SIZE=4096
 
 # Bottlerocket has been experimentally shown to boot faster on EBS volumes when striping the root filesystem into 4MiB stripes.
 # We use 4kb ext4 blocks. The stride and stripe should both be $STRIPE_SIZE / $EXT4_BLOCK_SIZE
-ROOT_STRIDE=1024
-ROOT_STRIPE_WIDTH=1024
+# ROOT_STRIDE=1024
+# ROOT_STRIPE_WIDTH=1024
 
 case "${PARTITION_PLAN}" in
   split)
@@ -263,6 +268,9 @@ fi
 # package has placed the image in /boot/efi/EFI/BOOT.
 mv "${ROOT_MOUNT}/boot/efi"/* "${EFI_MOUNT}"
 
+
+### Begin secure boot signing 
+
 # Do the setup required for `pesign` and `gpg` signing and
 # verification to "just work" later on, regardless of which
 # type of signing profile we have.
@@ -344,46 +352,46 @@ if [ "${UEFI_SECURE_BOOT}" == "yes" ] ; then
   gpg --list-keys
 fi
 
-# shim expects the following data structure in `.vendor_cert`:
-#
-# struct {
-#   uint32_t vendor_authorized_size;
-#   uint32_t vendor_deauthorized_size;
-#   uint32_t vendor_authorized_offset;
-#   uint32_t vendor_deauthorized_offset;
-# } cert_table;
-#
-cert_table() {
-  local input output size offset uint32_t
-  input="${1:?}"
-  output="${2:?}"
-  size="$(stat -c %s "${input}")"
-  rm -f "${output}"
-  # The cert payload is offset by four 4-byte uint32_t values in the header.
-  offset="$((4 * 4))"
-  for n in "${size}" 0 "${offset}" "$(( size + offset ))" ; do
-    printf -v uint32_t '\\x%02x\\x%02x\\x%02x\\x%02x' \
-      $((n & 255)) $((n >> 8 & 255)) $((n >> 16 & 255)) $((n >> 24 & 255))
-    printf "${uint32_t}" >> "${output}"
-  done
-  cat "${input}" >> "${output}"
-  # Zero-pad the output to the expected section size. Otherwise a subsequent
-  # `objcopy` operation on the same section might fail to replace it, if the
-  # new vendor certificate is larger than this one.
-  truncate -s 4096 "${output}"
-}
+# # shim expects the following data structure in `.vendor_cert`:
+# #
+# # struct {
+# #   uint32_t vendor_authorized_size;
+# #   uint32_t vendor_deauthorized_size;
+# #   uint32_t vendor_authorized_offset;
+# #   uint32_t vendor_deauthorized_offset;
+# # } cert_table;
+# #
+# cert_table() {
+#   local input output size offset uint32_t
+#   input="${1:?}"
+#   output="${2:?}"
+#   size="$(stat -c %s "${input}")"
+#   rm -f "${output}"
+#   # The cert payload is offset by four 4-byte uint32_t values in the header.
+#   offset="$((4 * 4))"
+#   for n in "${size}" 0 "${offset}" "$(( size + offset ))" ; do
+#     printf -v uint32_t '\\x%02x\\x%02x\\x%02x\\x%02x' \
+#       $((n & 255)) $((n >> 8 & 255)) $((n >> 16 & 255)) $((n >> 24 & 255))
+#     printf "${uint32_t}" >> "${output}"
+#   done
+#   cat "${input}" >> "${output}"
+#   # Zero-pad the output to the expected section size. Otherwise a subsequent
+#   # `objcopy` operation on the same section might fail to replace it, if the
+#   # new vendor certificate is larger than this one.
+#   truncate -s 4096 "${output}"
+# }
 
-# Helper function to log the object layout before and after changes.
-objdumpcopy() {
-  local obj objdump objcopy
-  obj="${1:?}"
-  shift
-  objdump="${ARCH}-bottlerocket-linux-gnu-objdump"
-  objcopy="${ARCH}-bottlerocket-linux-gnu-objcopy"
-  "${objdump}" -h "${obj}"
-  "${objcopy}" "${@}" "${obj}"
-  "${objdump}" -h "${obj}"
-}
+# # Helper function to log the object layout before and after changes.
+# objdumpcopy() {
+#   local obj objdump objcopy
+#   obj="${1:?}"
+#   shift
+#   objdump="${ARCH}-bottlerocket-linux-gnu-objdump"
+#   objcopy="${ARCH}-bottlerocket-linux-gnu-objcopy"
+#   "${objdump}" -h "${obj}"
+#   "${objcopy}" "${@}" "${obj}"
+#   "${objdump}" -h "${obj}"
+# }
 
 pushd "${EFI_MOUNT}/EFI/BOOT" >/dev/null
 shims=(boot*.efi)
@@ -430,6 +438,8 @@ else
      --remove-section ".pubkey"
 fi
 popd >/dev/null
+
+### End secure boot signing
 
 dd if=/dev/zero of="${EFI_IMAGE}" bs=1M count="${partsize[EFI-A]}"
 mkfs.vfat -I -S 512 "${EFI_IMAGE}" $((partsize[EFI-A] * 1024))

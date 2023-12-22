@@ -11,7 +11,10 @@ BUILDSYS_IMAGES_DIR = "${BUILDSYS_BUILD_DIR}/images"
 BUILDSYS_TOOLS_DIR = "${BUILDSYS_ROOT_DIR}/tools"
 BUILDSYS_SOURCES_DIR = "${BUILDSYS_ROOT_DIR}/sources"
 BUILDSYS_SBKEYS_DIR = "${BUILDSYS_ROOT_DIR}/sbkeys"
+BUILDSYS_MODIFY_IMAGE = "false"
 BUILDSYS_SBKEYS_PROFILE = { script = ['echo "${BUILDSYS_SBKEYS_PROFILE:-local}"'] }
+BUILDSYS_CACERTS_DIR = "${BUILDSYS_ROOT_DIR}/certs"
+BUILDSYS_CACERTS_BUNDLE = { script = ['echo "${BUILDSYS_CACERTS_BUNDLE:-${BUILDSYS_CACERTS_DIR}/ca-bundle.crt}"'] }
 BUILDSYS_TIMESTAMP = { script = ["date +%s"] }
 BUILDSYS_VERSION_BUILD = { script = ["git describe --always --dirty --exclude '*' || echo 00000000"] }
 # For now, release config path can't be overridden with -e, because it's used
@@ -868,6 +871,35 @@ cargo build \
 ln -snf "${BUILDSYS_VERSION_FULL}" "${BUILDSYS_OUTPUT_DIR}/latest"
 '''
 ]
+
+[tasks.modify-image]
+dependencies = ["fetch-sdk", "build-tools", "build-sbkeys", "publish-setup"]
+script = [
+'''
+export PATH="${BUILDSYS_TOOLS_DIR}/bin:${PATH}"
+
+# Parse the variant into its components and set additional variables.
+eval "$(bottlerocket-variant)"
+export BUILDSYS_VARIANT_PLATFORM="${BUILDSYS_VARIANT_PLATFORM:?}"
+export BUILDSYS_VARIANT_RUNTIME="${BUILDSYS_VARIANT_RUNTIME:?}"
+export BUILDSYS_VARIANT_FAMILY="${BUILDSYS_VARIANT_FAMILY:?}"
+export BUILDSYS_VARIANT_FLAVOR="${BUILDSYS_VARIANT_FLAVOR}"
+export PUBLISH_REPO_ROOT_JSON="${PUBLISH_REPO_ROOT_JSON}"
+export BUILDSYS_MODIFY_IMAGE=true
+
+# Save built artifacts for each architecture.  We don't set this everywhere
+# because we build host tools with cargo as well, like buildsys and pubsys.
+export CARGO_TARGET_DIR=${BUILDSYS_ROOT_DIR}/variants/target/${BUILDSYS_ARCH}
+
+cargo build \
+  ${CARGO_BUILD_ARGS} \
+  ${CARGO_MAKE_CARGO_ARGS} \
+  --manifest-path variants/${BUILDSYS_VARIANT}/Cargo.toml
+
+# ln -snf "${BUILDSYS_VERSION_FULL}" "${BUILDSYS_OUTPUT_DIR}/latest"
+'''
+]
+
 
 [tasks.check-licenses]
 dependencies = ["fetch"]
