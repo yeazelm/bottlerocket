@@ -295,6 +295,7 @@ struct KubernetesSettings {
     shutdown_grace_period_for_critical_pods: KubernetesDurationValue,
     memory_manager_reserved_memory: HashMap<Identifier, KubernetesMemoryReservation>,
     memory_manager_policy: KubernetesMemoryManagerPolicy,
+    reserved_cpus: SingleLineString,
 
     // Settings where we generate a value based on the runtime environment.  The user can specify a
     // value to override the generated one, but typically would not.
