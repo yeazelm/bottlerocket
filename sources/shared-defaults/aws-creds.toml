@@ -1,6 +1,9 @@
 [settings.aws]
 profile = "default"
 
+[metadata.settings.aws.config]
+setting-generator = "schnauzer-v2 render --requires 'aws@v1(helpers=[aws-config])' --template '{{ aws-config settings.aws.config settings.aws.profile }}'"
+
 [services.aws]
 configuration-files = [
   "aws-config",
