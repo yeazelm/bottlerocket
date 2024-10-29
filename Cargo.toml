@@ -41,6 +41,7 @@ members = [
     "variants/vmware-k8s-1.30",
     "variants/vmware-k8s-1.30-fips",
     "variants/vmware-k8s-1.31",
+    "variants/vmware-k8s-1.31-fips",
 ]
 
 [profile.dev]

@@ -346,3 +346,12 @@ dependencies = [
  "settings-migrations",
  "settings-plugins",
 ]
+
+[[package]]
+name = "vmware-k8s-1_31-fips"
+version = "0.1.0"
+dependencies = [
+ "settings-defaults",
+ "settings-migrations",
+ "settings-plugins",
+]
