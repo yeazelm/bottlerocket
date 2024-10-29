@@ -18,6 +18,7 @@ members = [
     "variants/aws-k8s-1.26-nvidia",
     "variants/aws-k8s-1.27",
     "variants/aws-k8s-1.28",
+    "variants/aws-k8s-1.28-fips",
     "variants/aws-k8s-1.29",
     "variants/aws-k8s-1.30",
     "variants/aws-k8s-1.31",
