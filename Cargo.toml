@@ -37,6 +37,7 @@ members = [
     "variants/vmware-k8s-1.28",
     "variants/vmware-k8s-1.28-fips",
     "variants/vmware-k8s-1.29",
+    "variants/vmware-k8s-1.29-fips",
     "variants/vmware-k8s-1.30",
     "variants/vmware-k8s-1.31",
 ]
