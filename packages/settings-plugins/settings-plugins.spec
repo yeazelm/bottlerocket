@@ -43,10 +43,15 @@ Conflicts: %{_cross_os}settings-plugin(any)
 
 %package aws-ecs-2
 Summary: Settings plugin for the aws-ecs-2 variant
-Requires: (%{_cross_os}variant(aws-ecs-2) or %{_cross_os}variant(aws-ecs-2-nvidia))
+Requires: (%{shrink:
+           %{_cross_os}variant(aws-ecs-2) or
+           %{_cross_os}variant(aws-ecs-2-fips) or
+           %{_cross_os}variant(aws-ecs-2-nvidia)
+           %{nil}})
 Provides: %{_cross_os}settings-plugin(any)
 Provides: %{_cross_os}settings-plugin(aws-ecs-2)
 Provides: %{_cross_os}settings-plugin(aws-ecs-2-nvidia)
+Provides: %{_cross_os}settings-plugin(aws-ecs-2-fips)
 Conflicts: %{_cross_os}settings-plugin(any)
 
 %description aws-ecs-2
@@ -61,9 +66,13 @@ Provides: %{_cross_os}settings-plugin(aws-k8s-1.25)
 Provides: %{_cross_os}settings-plugin(aws-k8s-1.26)
 Provides: %{_cross_os}settings-plugin(aws-k8s-1.27)
 Provides: %{_cross_os}settings-plugin(aws-k8s-1.28)
+Provides: %{_cross_os}settings-plugin(aws-k8s-1.28-fips)
 Provides: %{_cross_os}settings-plugin(aws-k8s-1.29)
+Provides: %{_cross_os}settings-plugin(aws-k8s-1.29-fips)
 Provides: %{_cross_os}settings-plugin(aws-k8s-1.30)
+Provides: %{_cross_os}settings-plugin(aws-k8s-1.30-fips)
 Provides: %{_cross_os}settings-plugin(aws-k8s-1.31)
+Provides: %{_cross_os}settings-plugin(aws-k8s-1.31-fips)
 Conflicts: %{_cross_os}settings-plugin(any)
 Conflicts: %{_cross_os}variant-flavor(nvidia)
 
@@ -127,9 +136,13 @@ Requires: %{_cross_os}variant-family(vmware-k8s)
 Provides: %{_cross_os}settings-plugin(any)
 Provides: %{_cross_os}settings-plugin(vmware-k8s-1.27)
 Provides: %{_cross_os}settings-plugin(vmware-k8s-1.28)
+Provides: %{_cross_os}settings-plugin(vmware-k8s-1.28-fips)
 Provides: %{_cross_os}settings-plugin(vmware-k8s-1.29)
+Provides: %{_cross_os}settings-plugin(vmware-k8s-1.29-fips)
 Provides: %{_cross_os}settings-plugin(vmware-k8s-1.30)
+Provides: %{_cross_os}settings-plugin(vmware-k8s-1.30-fips)
 Provides: %{_cross_os}settings-plugin(vmware-k8s-1.31)
+Provides: %{_cross_os}settings-plugin(vmware-k8s-1.31-fips)
 Conflicts: %{_cross_os}settings-plugin(any)
 
 %description vmware-k8s
