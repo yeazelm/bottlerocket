@@ -144,22 +144,12 @@ Conflicts: %{_cross_os}settings-plugin(any)
   -p settings-plugin-aws-dev \
   -p settings-plugin-aws-ecs-1 \
   -p settings-plugin-aws-ecs-2 \
+  -p settings-plugin-aws-k8s \
+  -p settings-plugin-aws-k8s-nvidia \
   -p settings-plugin-metal-dev \
   -p settings-plugin-metal-k8s \
   -p settings-plugin-vmware-dev \
   -p settings-plugin-vmware-k8s \
-  %{nil}
-
-# The settings-plugin-aws-k8s and settings-plugin-aws-k8s-nvidia are compiled independently
-# due to the requirement of distinct feature flags. This separation is necessary to prevent
-# feature unification, as detailed in the Rust Cargo documentation:
-# https://doc.rust-lang.org/cargo/reference/features.html#feature-unification
-%cargo_build --manifest-path %{_builddir}/sources/Cargo.toml \
-  -p settings-plugin-aws-k8s \
-  %{nil}
-
-%cargo_build --manifest-path %{_builddir}/sources/Cargo.toml \
-  -p settings-plugin-aws-k8s-nvidia \
   %{nil}
 
 %install
