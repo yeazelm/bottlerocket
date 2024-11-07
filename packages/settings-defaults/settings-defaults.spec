@@ -48,10 +48,14 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %{summary}.
 
 %package aws-ecs-2
-Summary: Settings defaults for the aws-ecs-2 variant
-Requires: %{_cross_os}variant(aws-ecs-2)
+Summary: Settings defaults for the aws-ecs-2 FIPS and non-FIPS variants
+Requires: (%{shrink:
+           %{_cross_os}variant(aws-ecs-2) or
+           %{_cross_os}variant(aws-ecs-2-fips)
+          %{nil}})
 Provides: %{_cross_os}settings-defaults(any)
 Provides: %{_cross_os}settings-defaults(aws-ecs-2)
+Provides: %{_cross_os}settings-defaults(aws-ecs-2-fips)
 Conflicts: %{_cross_os}settings-defaults(any)
 
 %description aws-ecs-2
@@ -130,18 +134,26 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %package aws-k8s-1.31
 Summary: Settings defaults for the aws-k8s 1.27 through 1.30 variants
 Requires: (%{shrink:
-           %{_cross_os}variant(aws-k8s-1.27) or
-           %{_cross_os}variant(aws-k8s-1.28) or
-           %{_cross_os}variant(aws-k8s-1.29) or
-           %{_cross_os}variant(aws-k8s-1.30) or
-           %{_cross_os}variant(aws-k8s-1.31)
+           %{_cross_os}variant(aws-k8s-1.27)      or
+           %{_cross_os}variant(aws-k8s-1.28)      or
+           %{_cross_os}variant(aws-k8s-1.28-fips) or
+           %{_cross_os}variant(aws-k8s-1.29)      or
+           %{_cross_os}variant(aws-k8s-1.29-fips) or
+           %{_cross_os}variant(aws-k8s-1.30)      or
+           %{_cross_os}variant(aws-k8s-1.30-fips) or
+           %{_cross_os}variant(aws-k8s-1.31)      or
+           %{_cross_os}variant(aws-k8s-1.31-fips)
            %{nil}})
 Provides: %{_cross_os}settings-defaults(any)
 Provides: %{_cross_os}settings-defaults(aws-k8s-1.27)
 Provides: %{_cross_os}settings-defaults(aws-k8s-1.28)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.28-fips)
 Provides: %{_cross_os}settings-defaults(aws-k8s-1.29)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.29-fips)
 Provides: %{_cross_os}settings-defaults(aws-k8s-1.30)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.30-fips)
 Provides: %{_cross_os}settings-defaults(aws-k8s-1.31)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.31-fips)
 Conflicts: %{_cross_os}settings-defaults(any)
 
 %description aws-k8s-1.31
@@ -208,18 +220,26 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %package vmware-k8s-1.31
 Summary: Settings defaults for the vmware-k8s 1.27 through 1.30 variants
 Requires: (%{shrink:
-           %{_cross_os}variant(vmware-k8s-1.27) or
-           %{_cross_os}variant(vmware-k8s-1.28) or
-           %{_cross_os}variant(vmware-k8s-1.29) or
-           %{_cross_os}variant(vmware-k8s-1.30) or
-           %{_cross_os}variant(vmware-k8s-1.31)
+           %{_cross_os}variant(vmware-k8s-1.27)      or
+           %{_cross_os}variant(vmware-k8s-1.28)      or
+           %{_cross_os}variant(vmware-k8s-1.28-fips) or
+           %{_cross_os}variant(vmware-k8s-1.29)      or
+           %{_cross_os}variant(vmware-k8s-1.29-fips) or
+           %{_cross_os}variant(vmware-k8s-1.30)      or
+           %{_cross_os}variant(vmware-k8s-1.30-fips) or
+           %{_cross_os}variant(vmware-k8s-1.31)      or
+           %{_cross_os}variant(vmware-k8s-1.31-fips)
            %{nil}})
 Provides: %{_cross_os}settings-defaults(any)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.27)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.28)
+Provides: %{_cross_os}settings-defaults(vmware-k8s-1.28-fips)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.29)
+Provides: %{_cross_os}settings-defaults(vmware-k8s-1.29-fips)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.30)
+Provides: %{_cross_os}settings-defaults(vmware-k8s-1.30-fips)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.31)
+Provides: %{_cross_os}settings-defaults(vmware-k8s-1.31-fips)
 Conflicts: %{_cross_os}settings-defaults(any)
 
 %description vmware-k8s-1.31
