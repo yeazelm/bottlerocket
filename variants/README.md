@@ -221,19 +221,6 @@ This variant is compatible with Kubernetes 1.31, 1.32, 1.33, and 1.34 clusters.
 The [metal-dev](metal-dev/Cargo.toml) variant has useful packages for local development of the OS and is intended to run bare metal.
 It includes tools for troubleshooting as well as Docker for running containers.
 
-### metal-k8s-1.28: Metal Kubernetes 1.28 node
-
-The [metal-k8s-1.28](metal-k8s-1.28/Cargo.toml) variant includes the packages needed to run a Kubernetes node on bare metal.
-It supports self-hosted clusters.
-
-This variant is compatible with Kubernetes 1.28, 1.29, 1.30, and 1.31 clusters.
-
-### metal-k8s-1.29: Metal Kubernetes 1.28 node
-
-The [metal-k8s-1.29](metal-k8s-1.29/Cargo.toml) variant includes the packages needed to run a Kubernetes node on bare metal.
-It supports self-hosted clusters.
-
-This variant is compatible with Kubernetes 1.29, 1.30, 1.31, and 1.32 clusters.
 
 ### Deprecated variants
 
@@ -445,6 +432,20 @@ The [metal-k8s-1.27](metal-k8s-1.27/Cargo.toml) variant included the packages ne
 It supported self-hosted clusters.
 
 This variant was compatible with Kubernetes 1.27, 1.28, 1.29, and 1.30 clusters.
+
+### metal-k8s-1.28: Metal Kubernetes 1.28 node
+
+The [metal-k8s-1.28](metal-k8s-1.28/Cargo.toml) variant included the packages needed to run a Kubernetes node on bare metal.
+It supports self-hosted clusters.
+
+This variant was compatible with Kubernetes 1.28, 1.29, 1.30, and 1.31 clusters.
+
+### metal-k8s-1.29: Metal Kubernetes 1.29 node
+
+The [metal-k8s-1.29](metal-k8s-1.29/Cargo.toml) variant included the packages needed to run a Kubernetes node on bare metal.
+It supports self-hosted clusters.
+
+This variant was compatible with Kubernetes 1.29, 1.30, 1.31, and 1.32 clusters.
 
 ## Development
 
