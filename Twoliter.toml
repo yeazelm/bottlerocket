@@ -6,10 +6,10 @@ registry = "public.ecr.aws/bottlerocket"
 
 [sdk]
 name = "bottlerocket-sdk"
-version = "0.46.0"
+version = "0.47.0"
 vendor = "bottlerocket"
 
 [[kit]]
 name = "bottlerocket-core-kit"
-version = "3.1.5"
+version = "3.2.0"
 vendor = "bottlerocket"
