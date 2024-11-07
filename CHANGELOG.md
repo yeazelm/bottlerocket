@@ -1,3 +1,25 @@
+# v1.27.0 (2024-11-12)
+
+## Release Highlights
+* Add FIPS variants ([#4274], [#1667], [#4267])
+* Drop k8s 1.28 and k8s 1.29 metal variants ([#4287])
+
+## OS Changes
+* Add aws-creds settings defaults to all AWS variants ([#4285])
+* Add support for migrations to modify aws-config setting generators ([#4271])
+
+## Build Changes
+* Update bottlerocket-core-kit to 3.2.0 ([#4286])
+* Update bottlerocket-sdk to 0.47.0 ([#4286])
+
+[#1667]: https://github.com/bottlerocket-os/bottlerocket/pull/1667
+[#4267]: https://github.com/bottlerocket-os/bottlerocket/pull/4267
+[#4271]: https://github.com/bottlerocket-os/bottlerocket/pull/4271
+[#4274]: https://github.com/bottlerocket-os/bottlerocket/pull/4274
+[#4285]: https://github.com/bottlerocket-os/bottlerocket/pull/4285
+[#4286]: https://github.com/bottlerocket-os/bottlerocket/pull/4286
+[#4287]: https://github.com/bottlerocket-os/bottlerocket/pull/4287
+
 # v1.26.2 (2024-11-04)
 
 ## Release Highlights
