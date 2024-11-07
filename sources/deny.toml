@@ -55,6 +55,12 @@ deny = [{ name = "structopt" }, { name = "clap", wrappers = ["cargo-readme"] }]
 skip = [
     # this can be removed once settings sdk is updated to base64 0.22.1
     { name = "base64", version = "=0.21.7" },
+    # aws-lc-rs is pinned to untrusted 0.7
+    # see: https://github.com/aws/aws-lc-rs/issues/468#issuecomment-2255866035
+    { name = "untrusted", version = "=0.7" },
+    # this can be removed once abi_stable in the bottlerocket-settings-sdk
+    # bumps its dependencies
+    { name = "libloading", version = "=0.7" },
 ]
 
 skip-tree = [
@@ -65,6 +71,9 @@ skip-tree = [
     { name = "windows-sys" },
     # schnauzer uses cached, which uses an older version of darling
     { name = "darling", version = "=0.14" },
+    # reqwest uses a new enough version of hyper-rustls that depends
+    # on hyper 1.5, but apiclient still depends on hyper 0.X
+    { name = "hyper", version = "=0.14" }
 ]
 
 [advisories]
