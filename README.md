@@ -92,15 +92,11 @@ We also have variants that are designed to be Kubernetes worker nodes in VMware:
 * `vmware-k8s-1.30`
 * `vmware-k8s-1.31`
 
-The following variants are designed to be Kubernetes worker nodes on bare metal:
-
-* `metal-k8s-1.28`
-* `metal-k8s-1.29`
-
 The following variants are no longer supported:
 
 * All Kubernetes variants using Kubernetes 1.23 and earlier
-* Bare metal and VMware variants using Kubernetes 1.27 and earlier
+* VMware variants using Kubernetes 1.27 and earlier
+* Bare metal variants for Kubernetes
 
 We recommend users replace nodes running these variants with the [latest variant compatible with their cluster](variants/).
 

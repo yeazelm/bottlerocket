@@ -39,7 +39,7 @@ You might need to install `jq` to fetch the VERSION.
 
 ```shell
 ARCH="x86_64"
-VERSION=$(curl -s https://api.github.com/repos/bottlerocket-os/bottlerocket/releases/latest | jq -r '.name')
+VERSION="v1.26.1" # New releases do not have metal-k8s variants
 VARIANT="metal-k8s-1.28"
 IMAGE="bottlerocket-${VARIANT}-${ARCH}-${VERSION}.img.lz4"
 OUTDIR="${VARIANT}-${VERSION}"

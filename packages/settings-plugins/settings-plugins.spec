@@ -107,19 +107,6 @@ Conflicts: %{_cross_os}settings-plugin(any)
 %description metal-dev
 %{summary}.
 
-%package metal-k8s
-Summary: Settings plugin for the metal-k8s variants
-Requires: %{_cross_os}variant-family(metal-k8s)
-Provides: %{_cross_os}settings-plugin(any)
-Provides: %{_cross_os}settings-plugin(metal-k8s-1.27)
-Provides: %{_cross_os}settings-plugin(metal-k8s-1.28)
-Provides: %{_cross_os}settings-plugin(metal-k8s-1.29)
-Provides: %{_cross_os}settings-plugin(metal-k8s-1.30)
-Conflicts: %{_cross_os}settings-plugin(any)
-
-%description metal-k8s
-%{summary}.
-
 %package vmware-dev
 Summary: Settings plugin for the vmware-dev variant
 Requires: %{_cross_os}variant(vmware-dev)
@@ -160,7 +147,6 @@ Conflicts: %{_cross_os}settings-plugin(any)
   -p settings-plugin-aws-k8s \
   -p settings-plugin-aws-k8s-nvidia \
   -p settings-plugin-metal-dev \
-  -p settings-plugin-metal-k8s \
   -p settings-plugin-vmware-dev \
   -p settings-plugin-vmware-k8s \
   %{nil}
@@ -177,7 +163,6 @@ for plugin in \
   aws-k8s-nvidia \
   aws-k8s \
   metal-dev \
-  metal-k8s \
   vmware-dev \
   vmware-k8s \
   ;
@@ -227,11 +212,6 @@ done
 %{_cross_pluginsdir}/metal-dev/libsettings.so
 %{_cross_factorydir}%{_cross_sysconfdir}/ld.so.conf.d/metal-dev.conf
 %{_cross_tmpfilesdir}/settings-plugin-metal-dev.conf
-
-%files metal-k8s
-%{_cross_pluginsdir}/metal-k8s/libsettings.so
-%{_cross_factorydir}%{_cross_sysconfdir}/ld.so.conf.d/metal-k8s.conf
-%{_cross_tmpfilesdir}/settings-plugin-metal-k8s.conf
 
 %files vmware-dev
 %{_cross_pluginsdir}/vmware-dev/libsettings.so

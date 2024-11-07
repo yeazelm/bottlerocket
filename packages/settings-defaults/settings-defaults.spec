@@ -189,24 +189,6 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %description metal-dev
 %{summary}.
 
-%package metal-k8s-1.30
-Summary: Settings defaults for the metal-k8s 1.27 through 1.30 variants
-Requires: (%{shrink:
-           %{_cross_os}variant(metal-k8s-1.27) or
-           %{_cross_os}variant(metal-k8s-1.28) or
-           %{_cross_os}variant(metal-k8s-1.29) or
-           %{_cross_os}variant(metal-k8s-1.30)
-           %{nil}})
-Provides: %{_cross_os}settings-defaults(any)
-Provides: %{_cross_os}settings-defaults(metal-k8s-1.27)
-Provides: %{_cross_os}settings-defaults(metal-k8s-1.28)
-Provides: %{_cross_os}settings-defaults(metal-k8s-1.29)
-Provides: %{_cross_os}settings-defaults(metal-k8s-1.30)
-Conflicts: %{_cross_os}settings-defaults(any)
-
-%description metal-k8s-1.30
-%{summary}.
-
 %package vmware-dev
 Summary: Settings defaults for the vmware-dev variant
 Requires: %{_cross_os}variant(vmware-dev)
@@ -266,7 +248,6 @@ for defaults in \
   aws-k8s-1.31 \
   aws-k8s-1.31-nvidia \
   metal-dev \
-  metal-k8s-1.30 \
   vmware-dev \
   vmware-k8s-1.31 \
   ;
@@ -303,7 +284,6 @@ for defaults in \
   aws-k8s-1.31 \
   aws-k8s-1.31-nvidia \
   metal-dev \
-  metal-k8s-1.30 \
   vmware-dev \
   vmware-k8s-1.31 \
   ;
@@ -375,10 +355,6 @@ done
 %files metal-dev
 %{_cross_defaultsdir}/metal-dev.toml
 %{_cross_tmpfilesdir}/storewolf-defaults-metal-dev.conf
-
-%files metal-k8s-1.30
-%{_cross_defaultsdir}/metal-k8s-1.30.toml
-%{_cross_tmpfilesdir}/storewolf-defaults-metal-k8s-1.30.conf
 
 %files vmware-dev
 %{_cross_defaultsdir}/vmware-dev.toml
