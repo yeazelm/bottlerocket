@@ -141,6 +141,9 @@ restart-commands = ["/usr/bin/corndog sysctl"]
 [metadata.settings.kernel.sysctl]
 affected-services = ["sysctl"]
 
+[metadata.settings.kernel.sysctl."vm/nr_hugepages"]
+setting-generator = "corndog generate-hugepages-setting"
+
 [services.kernel-modules]
 configuration-files = ["modprobe-conf", "modules-load"]
 restart-commands = ["/usr/bin/systemctl try-restart systemd-modules-load"]
