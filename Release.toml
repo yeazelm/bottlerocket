@@ -1,4 +1,4 @@
-version = "1.27.1"
+version = "1.28.0"
 
 [migrations]
 "(0.3.1, 0.3.2)" = ["migrate_v0.3.2_admin-container-v0-5-0.lz4"]
@@ -372,3 +372,6 @@ version = "1.27.1"
     "migrate_v1.27.0_aws-config.lz4",
 ]
 "(1.27.0, 1.27.1)" = []
+"(1.27.1, 1.28.0)" = [
+    "migrate_v1.28.0_kernel-sysctl-hugepages.lz4"
+]
