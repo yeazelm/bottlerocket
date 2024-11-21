@@ -66,6 +66,7 @@ members = [
     "settings-migrations/v1.25.0/aws-control-container-v0-7-17",
     "settings-migrations/v1.25.0/public-control-container-v0-7-17",
     "settings-migrations/v1.27.0/aws-config",
+    "settings-migrations/v1.28.0/kernel-sysctl-hugepages",
     "settings-plugins/aws-dev",
     "settings-plugins/aws-ecs-1",
     "settings-plugins/aws-ecs-2",

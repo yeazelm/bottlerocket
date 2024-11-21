@@ -1564,6 +1564,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "kernel-sysctl-hugepages"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
 name = "kubelet-device-plugins-metadata"
 version = "0.1.0"
 dependencies = [
