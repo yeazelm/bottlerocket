@@ -373,5 +373,7 @@ version = "1.28.0"
 ]
 "(1.27.0, 1.27.1)" = []
 "(1.27.1, 1.28.0)" = [
-    "migrate_v1.28.0_kernel-sysctl-hugepages.lz4"
+    "migrate_v1.28.0_kernel-sysctl-hugepages.lz4",
+    "migrate_v1.28.0_aws-admin-container-v0-11-14.lz4",
+    "migrate_v1.28.0_public-admin-container-v0-11-14.lz4",
 ]
