@@ -266,7 +266,6 @@ impl Migration for ReplaceStringMigration {
 // String is the only type we use today, and handling multiple value types is more complicated than
 // we need at the moment.  Allowing &[serde_json::Value] seems nice, but it would allow arbitrary
 // data transformations that the API model would then fail to load.
-
 pub struct ListReplacement {
     pub setting: &'static str,
     pub old_vals: &'static [&'static str],
@@ -1373,7 +1372,6 @@ mod test_remove_metadata {
 // String is the only type we use today, and handling multiple value types is more complicated than
 // we need at the moment.  Allowing &[serde_json::Value] seems nice, but it would allow arbitrary
 // data transformations that the API model would then fail to load.
-
 pub struct MetadataListReplacement {
     pub setting: &'static str,
     pub metadata: &'static str,

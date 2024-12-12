@@ -1131,7 +1131,6 @@ pub fn toml_encode(
 
 /// kube_reserve_memory and kube_reserve_cpu are taken from EKS' calculations.
 /// https://github.com/awslabs/amazon-eks-ami/blob/db28da15d2b696bc08ac3aacc9675694f4a69933/files/bootstrap.sh
-
 /// Calculates the amount of memory to reserve for kubeReserved in mebibytes.
 /// Formula: memory_to_reserve = max_num_pods * 11 + 255 is taken from
 /// https://github.com/awslabs/amazon-eks-ami/pull/419#issuecomment-609985305
@@ -1438,7 +1437,6 @@ pub fn etc_hosts_entries(
 /// The first argument for the helper is the default value; the second argument is the key to
 /// negate. Both values must be booleans, otherwise the helper will return an error. The default
 /// value will be returned as it is if the provided key is missing.
-
 pub fn negate_or_else(
     helper: &Helper<'_, '_>,
     _: &Handlebars,
