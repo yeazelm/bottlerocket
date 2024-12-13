@@ -1,3 +1,16 @@
+# v1.29.0 (2024-12-17)
+
+## Build Changes
+* Add bottlerocket-kernel-kit 1.0.0 ([#4332])
+* Update bottlerocket-core-kit to 5.0.0 ([#4332])
+* Update bottlerocket-sdk to 0.50.0 ([#4332])
+
+## OS Changes
+* Enable plugins and detailed EBS volume stats for `nvme-cli` ([bottlerocket-core-kit#269](https://github.com/bottlerocket-os/bottlerocket-core-kit/pull/269))
+* Set `LoaderTimeInitUSec` and `LoaderTimeExecUSec` in GRUB ([bottlerocket-core-kit#273](https://github.com/bottlerocket-os/bottlerocket-core-kit/pull/273))
+
+[#4332]: https://github.com/bottlerocket-os/bottlerocket/pull/4332
+
 # v1.28.0 (2024-12-08)
 
 ## Release Highlights
