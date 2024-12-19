@@ -1606,6 +1606,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "kubernetes-device-ownership-metadata"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "kubernetes-device-ownership-settings"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
 name = "kubernetes-service-config"
 version = "0.1.0"
 dependencies = [
