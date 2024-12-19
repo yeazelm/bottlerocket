@@ -1,0 +1,5 @@
+[settings.kubernetes]
+device-ownership-from-security-context = false
+
+[metadata.settings.kubernetes.device-ownership-from-security-context]
+affected-services = ["containerd"]
