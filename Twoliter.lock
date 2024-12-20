@@ -9,10 +9,10 @@ digest = "Rjpy/gVgBhU/B696xaK1Y4/drz4pNJu+fyyZSIk9oLE="
 
 [[kit]]
 name = "bottlerocket-kernel-kit"
-version = "1.0.0"
+version = "1.0.2"
 vendor = "bottlerocket"
-source = "public.ecr.aws/bottlerocket/bottlerocket-kernel-kit:v1.0.0"
-digest = "9WzJBYokL4e3FyUOHqHi01VkKFS9zo5jiT+uHf+fxDw="
+source = "public.ecr.aws/bottlerocket/bottlerocket-kernel-kit:v1.0.2"
+digest = "LpwDWPrnz82tSbZF87jkcppRuqIkJ48EObt1MaNmVqU="
 
 [[kit]]
 name = "bottlerocket-core-kit"
