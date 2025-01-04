@@ -372,6 +372,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "aws-control-container-v0-7-19"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
 name = "aws-lc-fips-sys"
 version = "0.12.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2146,6 +2153,13 @@ dependencies = [
 
 [[package]]
 name = "public-control-container-v0-7-18"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "public-control-container-v0-7-19"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
