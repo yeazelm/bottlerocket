@@ -323,6 +323,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "aws-admin-container-v0-11-15"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
 name = "aws-config"
 version = "0.1.0"
 dependencies = [
@@ -359,6 +366,13 @@ dependencies = [
 
 [[package]]
 name = "aws-control-container-v0-7-18"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "aws-control-container-v0-7-19"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
@@ -2103,6 +2117,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "public-admin-container-v0-11-15"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
 name = "public-control-container-v0-7-14"
 version = "0.1.0"
 dependencies = [
@@ -2132,6 +2153,13 @@ dependencies = [
 
 [[package]]
 name = "public-control-container-v0-7-18"
+version = "0.1.0"
+dependencies = [
+ "migration-helpers",
+]
+
+[[package]]
+name = "public-control-container-v0-7-19"
 version = "0.1.0"
 dependencies = [
  "migration-helpers",
