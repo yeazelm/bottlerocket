@@ -1,3 +1,24 @@
+# v1.30.0 (2025-01-07)
+
+## OS Changes
+* Update host containers ([#4353])
+
+## Orchestrator Changes
+
+### Kubernetes
+* Add Kubernetes 1.32 variants ([#4320])
+* Add device-ownership-from-security-context setting (default to true on aws-k8s-1.32) ([#4345])
+
+## Build Changes
+* Update bottlerocket-core-kit to 5.3.0 (#[4351])
+* Update bottlerocket-kernel-kit to 1.0.2 (#[4344])
+
+[#4320]: https://github.com/bottlerocket-os/bottlerocket/pull/4320
+[#4344]: https://github.com/bottlerocket-os/bottlerocket/pull/4344
+[#4345]: https://github.com/bottlerocket-os/bottlerocket/pull/4345
+[#4351]: https://github.com/bottlerocket-os/bottlerocket/pull/4351
+[#4353]: https://github.com/bottlerocket-os/bottlerocket/pull/4353
+
 # v1.29.0 (2024-12-17)
 
 ## Build Changes
