@@ -132,7 +132,7 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %{summary}.
 
 %package aws-k8s-1.31
-Summary: Settings defaults for the aws-k8s 1.27 through 1.30 variants
+Summary: Settings defaults for the aws-k8s 1.27 through 1.31 variants
 Requires: (%{shrink:
            %{_cross_os}variant(aws-k8s-1.27)      or
            %{_cross_os}variant(aws-k8s-1.28)      or
@@ -160,7 +160,7 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %{summary}.
 
 %package aws-k8s-1.31-nvidia
-Summary: Settings defaults for the aws-k8s 1.27 through 1.30 nvidia variants
+Summary: Settings defaults for the aws-k8s 1.27 through 1.31 nvidia variants
 Requires: (%{shrink:
            %{_cross_os}variant(aws-k8s-1.27-nvidia) or
            %{_cross_os}variant(aws-k8s-1.28-nvidia) or
@@ -177,6 +177,32 @@ Provides: %{_cross_os}settings-defaults(aws-k8s-1.31-nvidia)
 Conflicts: %{_cross_os}settings-defaults(any)
 
 %description aws-k8s-1.31-nvidia
+%{summary}.
+
+%package aws-k8s-1.32
+Summary: Settings defaults for the aws-k8s 1.32 variants
+Requires: (%{shrink:
+           %{_cross_os}variant(aws-k8s-1.32)      or
+           %{_cross_os}variant(aws-k8s-1.32-fips)
+           %{nil}})
+Provides: %{_cross_os}settings-defaults(any)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.32)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.32-fips)
+Conflicts: %{_cross_os}settings-defaults(any)
+
+%description aws-k8s-1.32
+%{summary}.
+
+%package aws-k8s-1.32-nvidia
+Summary: Settings defaults for the aws-k8s 1.32 nvidia variants
+Requires: (%{shrink:
+           %{_cross_os}variant(aws-k8s-1.32-nvidia)
+           %{nil}})
+Provides: %{_cross_os}settings-defaults(any)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.32-nvidia)
+Conflicts: %{_cross_os}settings-defaults(any)
+
+%description aws-k8s-1.32-nvidia
 %{summary}.
 
 %package metal-dev
@@ -199,8 +225,8 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %description vmware-dev
 %{summary}.
 
-%package vmware-k8s-1.31
-Summary: Settings defaults for the vmware-k8s 1.27 through 1.30 variants
+%package vmware-k8s-1.32
+Summary: Settings defaults for the vmware-k8s 1.27 through 1.32 variants
 Requires: (%{shrink:
            %{_cross_os}variant(vmware-k8s-1.27)      or
            %{_cross_os}variant(vmware-k8s-1.28)      or
@@ -210,8 +236,10 @@ Requires: (%{shrink:
            %{_cross_os}variant(vmware-k8s-1.30)      or
            %{_cross_os}variant(vmware-k8s-1.30-fips) or
            %{_cross_os}variant(vmware-k8s-1.31)      or
-           %{_cross_os}variant(vmware-k8s-1.31-fips)
-           %{nil}})
+           %{_cross_os}variant(vmware-k8s-1.31-fips) or
+           %{_cross_os}variant(vmware-k8s-1.32)      or
+           %{_cross_os}variant(vmware-k8s-1.32-fips)
+          %{nil}})
 Provides: %{_cross_os}settings-defaults(any)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.27)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.28)
@@ -222,9 +250,11 @@ Provides: %{_cross_os}settings-defaults(vmware-k8s-1.30)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.30-fips)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.31)
 Provides: %{_cross_os}settings-defaults(vmware-k8s-1.31-fips)
+Provides: %{_cross_os}settings-defaults(vmware-k8s-1.32)
+Provides: %{_cross_os}settings-defaults(vmware-k8s-1.32-fips)
 Conflicts: %{_cross_os}settings-defaults(any)
 
-%description vmware-k8s-1.31
+%description vmware-k8s-1.32
 %{summary}.
 
 %prep
@@ -247,9 +277,11 @@ for defaults in \
   aws-k8s-1.26-nvidia \
   aws-k8s-1.31 \
   aws-k8s-1.31-nvidia \
+  aws-k8s-1.32 \
+  aws-k8s-1.32-nvidia \
   metal-dev \
   vmware-dev \
-  vmware-k8s-1.31 \
+  vmware-k8s-1.32 \
   ;
 do
   projects+=( "-p" "settings-defaults-$(echo "${defaults}" | sed -e 's,\.,_,g')" )
@@ -283,9 +315,11 @@ for defaults in \
   aws-k8s-1.26-nvidia \
   aws-k8s-1.31 \
   aws-k8s-1.31-nvidia \
+  aws-k8s-1.32 \
+  aws-k8s-1.32-nvidia \
   metal-dev \
   vmware-dev \
-  vmware-k8s-1.31 \
+  vmware-k8s-1.32 \
   ;
 do
   crate="$(echo "${defaults}" | sed -e 's,\.,_,g')"
@@ -352,6 +386,14 @@ done
 %{_cross_defaultsdir}/aws-k8s-1.31-nvidia.toml
 %{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.31-nvidia.conf
 
+%files aws-k8s-1.32
+%{_cross_defaultsdir}/aws-k8s-1.32.toml
+%{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.32.conf
+
+%files aws-k8s-1.32-nvidia
+%{_cross_defaultsdir}/aws-k8s-1.32-nvidia.toml
+%{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.32-nvidia.conf
+
 %files metal-dev
 %{_cross_defaultsdir}/metal-dev.toml
 %{_cross_tmpfilesdir}/storewolf-defaults-metal-dev.conf
@@ -360,6 +402,6 @@ done
 %{_cross_defaultsdir}/vmware-dev.toml
 %{_cross_tmpfilesdir}/storewolf-defaults-vmware-dev.conf
 
-%files vmware-k8s-1.31
-%{_cross_defaultsdir}/vmware-k8s-1.31.toml
-%{_cross_tmpfilesdir}/storewolf-defaults-vmware-k8s-1.31.conf
+%files vmware-k8s-1.32
+%{_cross_defaultsdir}/vmware-k8s-1.32.toml
+%{_cross_tmpfilesdir}/storewolf-defaults-vmware-k8s-1.32.conf

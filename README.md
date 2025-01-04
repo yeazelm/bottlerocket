@@ -69,6 +69,7 @@ The following variants support EKS, as described above:
 * `aws-k8s-1.29`
 * `aws-k8s-1.30`
 * `aws-k8s-1.31`
+* `aws-k8s-1.32`
 * `aws-k8s-1.24-nvidia`
 * `aws-k8s-1.25-nvidia`
 * `aws-k8s-1.26-nvidia`
@@ -77,6 +78,7 @@ The following variants support EKS, as described above:
 * `aws-k8s-1.29-nvidia`
 * `aws-k8s-1.30-nvidia`
 * `aws-k8s-1.31-nvidia`
+* `aws-k8s-1.32-nvidia`
 
 The following variants support ECS:
 
@@ -91,6 +93,7 @@ We also have variants that are designed to be Kubernetes worker nodes in VMware:
 * `vmware-k8s-1.29`
 * `vmware-k8s-1.30`
 * `vmware-k8s-1.31`
+* `vmware-k8s-1.32`
 
 The following variants are no longer supported:
 
@@ -387,7 +390,7 @@ See the ["Capabilities Settings" section in the `settings.oci-defaults.*` refere
 ##### OCI Defaults: Resource Limits
 
 See the ["Resource Limits Settings" section in the `settings.oci-defaults.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/).
-  
+
 #### Container image registry settings
 
 See the [`settings.container-registry.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/container-registry/).
@@ -407,7 +410,7 @@ See the [`settings.network.*` reference](https://bottlerocket.dev/en/os/latest/#
 ##### Proxy settings
 
 See the ["Proxy Settings" section in the `settings.networks.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/network/).
-  
+
 #### Metrics settings
 
 See the [`settings.metrics.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/metrics/).
