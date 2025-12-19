@@ -5,17 +5,20 @@ project-vendor = "Bottlerocket"
 [vendor.bottlerocket]
 registry = "public.ecr.aws/bottlerocket"
 
+[vendor.local]
+registry = "localhost:5000"
+
 [sdk]
 name = "bottlerocket-sdk"
-version = "0.65.1"
+version = "0.66.0"
 vendor = "bottlerocket"
 
 [[kit]]
 name = "bottlerocket-kernel-kit"
-version = "4.5.1"
-vendor = "bottlerocket"
+version = "4.6.1"
+vendor = "local"
 
 [[kit]]
 name = "bottlerocket-core-kit"
 version = "11.1.0"
-vendor = "bottlerocket"
+vendor = "local"

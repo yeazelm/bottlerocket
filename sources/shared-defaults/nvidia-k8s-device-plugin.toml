@@ -4,8 +4,14 @@ restart-commands = ["/bin/systemctl try-reload-or-restart nvidia-k8s-device-plug
 configuration-files = [
     "nvidia-k8s-device-plugin-conf",
     "nvidia-k8s-device-plugin-exec-start-conf",
-    "nvidia-k8s-device-plugin-mig-conf"
+    "nvidia-k8s-device-plugin-mig-conf",
+    "nvidia-mps-enabled-conf"
 ]
+
+# nvidia mps control daemon service
+[services.nvidia-mps-control-daemon]
+restart-commands = ["/bin/systemctl try-reload-or-restart nvidia-mps-control-daemon.service"]
+configuration-files = ["nvidia-mps-enabled-conf"]
 
 [configuration-files.nvidia-k8s-device-plugin-conf]
 path = "/etc/nvidia-k8s-device-plugin/settings.yaml"
@@ -19,8 +25,12 @@ template-path = "/usr/share/templates/nvidia-k8s-device-plugin-exec-start-conf"
 path = "/etc/nvidia-migmanager/nvidia-migmanager.toml"
 template-path = "/usr/share/templates/nvidia-k8s-device-plugin-mig-conf"
 
+[configuration-files.nvidia-mps-enabled-conf]
+path = "/etc/nvidia-mps/enabled"
+template-path = "/usr/share/templates/nvidia-mps-enabled-conf"
+
 [metadata.settings.kubelet-device-plugins.nvidia]
-affected-services = ["nvidia-k8s-device-plugin", "nvidia-container-toolkit"]
+affected-services = ["nvidia-k8s-device-plugin", "nvidia-container-toolkit", "nvidia-mps-control-daemon"]
 
 [settings.kubelet-device-plugins.nvidia]
 pass-device-specs = true
