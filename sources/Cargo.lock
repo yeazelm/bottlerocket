@@ -1839,6 +1839,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "settings-defaults-aws-ecs-3-amdgpu"
+version = "0.1.0"
+dependencies = [
+ "bottlerocket-defaults-helper",
+]
+
+[[package]]
 name = "settings-defaults-aws-ecs-3-nvidia"
 version = "0.1.0"
 dependencies = [

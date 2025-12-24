@@ -10,6 +10,8 @@ members = [
     "variants/aws-ecs-2-nvidia",
     "variants/aws-ecs-2-nvidia-fips",
     "variants/aws-ecs-3",
+    "variants/aws-ecs-3-amdgpu",
+    "variants/aws-ecs-3-amdgpu-fips",
     "variants/aws-ecs-3-fips",
     "variants/aws-ecs-3-nvidia",
     "variants/aws-ecs-3-nvidia-fips",
