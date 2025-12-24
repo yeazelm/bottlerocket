@@ -57,6 +57,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "aws-ecs-3-amdgpu"
+version = "0.1.0"
+dependencies = [
+ "settings-defaults",
+ "settings-migrations",
+ "settings-plugins",
+]
+
+[[package]]
+name = "aws-ecs-3-amdgpu-fips"
+version = "0.1.0"
+dependencies = [
+ "settings-defaults",
+ "settings-migrations",
+ "settings-plugins",
+]
+
+[[package]]
 name = "aws-ecs-3-fips"
 version = "0.1.0"
 dependencies = [

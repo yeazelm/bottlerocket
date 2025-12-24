@@ -52,12 +52,16 @@ Conflicts: %{_cross_os}settings-plugin(any)
 Summary: Settings plugin for the aws-ecs-3 variant
 Requires: (%{shrink:
            %{_cross_os}variant(aws-ecs-3) or
+           %{_cross_os}variant(aws-ecs-3-amdgpu) or
+           %{_cross_os}variant(aws-ecs-3-amdgpu-fips) or
            %{_cross_os}variant(aws-ecs-3-fips) or
            %{_cross_os}variant(aws-ecs-3-nvidia) or
            %{_cross_os}variant(aws-ecs-3-nvidia-fips)
            %{nil}})
 Provides: %{_cross_os}settings-plugin(any)
 Provides: %{_cross_os}settings-plugin(aws-ecs-3)
+Provides: %{_cross_os}settings-plugin(aws-ecs-3-amdgpu)
+Provides: %{_cross_os}settings-plugin(aws-ecs-3-amdgpu-fips)
 Provides: %{_cross_os}settings-plugin(aws-ecs-3-nvidia)
 Provides: %{_cross_os}settings-plugin(aws-ecs-3-nvidia-fips)
 Provides: %{_cross_os}settings-plugin(aws-ecs-3-fips)
