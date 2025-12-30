@@ -1909,6 +1909,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "settings-defaults-aws-k8s-1_34-amdgpu"
+version = "0.1.0"
+dependencies = [
+ "bottlerocket-defaults-helper",
+]
+
+[[package]]
 name = "settings-defaults-aws-k8s-1_34-nvidia"
 version = "0.1.0"
 dependencies = [

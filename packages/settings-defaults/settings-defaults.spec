@@ -225,6 +225,20 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %description aws-k8s-1.34
 %{summary}.
 
+%package aws-k8s-1.34-amdgpu
+Summary: Settings defaults for the aws-k8s 1.34 amdgpu variants
+Requires: (%{shrink:
+           %{_cross_os}variant(aws-k8s-1.34-amdgpu)      or
+           %{_cross_os}variant(aws-k8s-1.34-amdgpu-fips)
+           %{nil}})
+Provides: %{_cross_os}settings-defaults(any)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.34-amdgpu)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.34-amdgpu-fips)
+Conflicts: %{_cross_os}settings-defaults(any)
+
+%description aws-k8s-1.34-amdgpu
+%{summary}.
+
 %package aws-k8s-1.34-nvidia
 Summary: Settings defaults for the aws-k8s 1.34 nvidia variants
 Requires: (%{shrink:
@@ -334,6 +348,7 @@ for defaults in \
   aws-k8s-1.33-amdgpu \
   aws-k8s-1.33-nvidia \
   aws-k8s-1.34 \
+  aws-k8s-1.34-amdgpu \
   aws-k8s-1.34-nvidia \
   metal-dev \
   vmware-dev \
@@ -374,6 +389,7 @@ for defaults in \
   aws-k8s-1.33-amdgpu \
   aws-k8s-1.33-nvidia \
   aws-k8s-1.34 \
+  aws-k8s-1.34-amdgpu \
   aws-k8s-1.34-nvidia \
   metal-dev \
   vmware-dev \
@@ -449,6 +465,10 @@ done
 %files aws-k8s-1.34
 %{_cross_defaultsdir}/aws-k8s-1.34.toml
 %{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.34.conf
+
+%files aws-k8s-1.34-amdgpu
+%{_cross_defaultsdir}/aws-k8s-1.34-amdgpu.toml
+%{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.34-amdgpu.conf
 
 %files aws-k8s-1.34-nvidia
 %{_cross_defaultsdir}/aws-k8s-1.34-nvidia.toml
