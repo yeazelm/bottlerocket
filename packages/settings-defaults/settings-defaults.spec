@@ -183,6 +183,20 @@ Conflicts: %{_cross_os}settings-defaults(any)
 %description aws-k8s-1.33
 %{summary}.
 
+%package aws-k8s-1.33-amdgpu
+Summary: Settings defaults for the aws-k8s 1.33 amdgpu variants
+Requires: (%{shrink:
+           %{_cross_os}variant(aws-k8s-1.33-amdgpu)      or
+           %{_cross_os}variant(aws-k8s-1.33-amdgpu-fips)
+           %{nil}})
+Provides: %{_cross_os}settings-defaults(any)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.33-amdgpu)
+Provides: %{_cross_os}settings-defaults(aws-k8s-1.33-amdgpu-fips)
+Conflicts: %{_cross_os}settings-defaults(any)
+
+%description aws-k8s-1.33-amdgpu
+%{summary}.
+
 %package aws-k8s-1.33-nvidia
 Summary: Settings defaults for the aws-k8s 1.33 nvidia variants
 Requires: (%{shrink:
@@ -317,6 +331,7 @@ for defaults in \
   aws-k8s-1.32 \
   aws-k8s-1.32-nvidia \
   aws-k8s-1.33 \
+  aws-k8s-1.33-amdgpu \
   aws-k8s-1.33-nvidia \
   aws-k8s-1.34 \
   aws-k8s-1.34-nvidia \
@@ -356,6 +371,7 @@ for defaults in \
   aws-k8s-1.32 \
   aws-k8s-1.32-nvidia \
   aws-k8s-1.33 \
+  aws-k8s-1.33-amdgpu \
   aws-k8s-1.33-nvidia \
   aws-k8s-1.34 \
   aws-k8s-1.34-nvidia \
@@ -421,6 +437,10 @@ done
 %files aws-k8s-1.33
 %{_cross_defaultsdir}/aws-k8s-1.33.toml
 %{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.33.conf
+
+%files aws-k8s-1.33-amdgpu
+%{_cross_defaultsdir}/aws-k8s-1.33-amdgpu.toml
+%{_cross_tmpfilesdir}/storewolf-defaults-aws-k8s-1.33-amdgpu.conf
 
 %files aws-k8s-1.33-nvidia
 %{_cross_defaultsdir}/aws-k8s-1.33-nvidia.toml
